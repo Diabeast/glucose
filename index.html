@@ -8,117 +8,88 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-:root, [data-theme="light"] {
-  --color-bg: #f7f6f2; --color-surface: #f9f8f5; --color-surface-offset: #f3f0ec;
-  --color-divider: #dcd9d5; --color-border: #d4d1ca; --color-text: #28251d;
-  --color-text-muted: #7a7974; --color-text-faint: #bab9b4; --color-primary: #01696f;
-  --color-success: #437a22; --color-success-highlight: #d4dfcc; --color-warning: #964219;
-  --color-warning-highlight: #ddcfc6; --color-error: #a12c7b; --color-error-highlight: #e0ced7;
-  --color-orange: #da7101; --color-orange-highlight: #e7d7c4; --color-blue: #006494;
-  --color-blue-highlight: #c6d8e4; --shadow-sm: 0 1px 2px oklch(0.2 0.01 80 / 0.06);
-  --radius-sm: 0.375rem; --radius-md: 0.5rem; --radius-lg: 0.75rem; --radius-xl: 1rem;
-  --text-xs: 0.75rem; --text-sm: 0.875rem; --text-base: 1rem; --text-lg: 1.125rem;
-  --text-xl: 1.5rem; --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem;
-  --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem;
-  --font-body: 'Inter', sans-serif; --font-mono: 'JetBrains Mono', monospace;
-  --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1); --sidebar-width: 240px;
-}
-[data-theme="dark"] {
-  --color-bg: #171614; --color-surface: #1c1b19; --color-surface-offset: #1d1c1a;
-  --color-divider: #262523; --color-border: #393836; --color-text: #cdccca;
-  --color-text-muted: #797876; --color-text-faint: #5a5957; --color-primary: #4f98a3;
-  --color-success: #6daa45; --color-success-highlight: #3a4435; --color-warning: #bb653b;
-  --color-warning-highlight: #564942; --color-error: #d163a7; --color-error-highlight: #4c3d46;
-  --color-orange: #fdab43; --color-orange-highlight: #564b3e; --color-blue: #5591c7;
-  --color-blue-highlight: #3a4550;
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { min-height: 100dvh; font-family: var(--font-body); font-size: var(--text-base); color: var(--color-text); background: var(--color-bg); }
-button { cursor: pointer; background: none; border: none; font: inherit; color: inherit; }
-.sidebar { width: var(--sidebar-width); min-height: 100dvh; background: var(--color-surface); border-right: 1px solid var(--color-border); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; overflow-y: auto; }
-.sidebar-logo { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-5); border-bottom: 1px solid var(--color-divider); }
-.sidebar-logo-text { font-size: var(--text-sm); font-weight: 600; }
-.sidebar-logo-sub { font-size: var(--text-xs); color: var(--color-text-muted); }
-.sidebar-nav { flex: 1; padding: var(--space-4) var(--space-3); display: flex; flex-direction: column; gap: var(--space-1); }
-.nav-section-label { font-size: var(--text-xs); font-weight: 600; color: var(--color-text-faint); text-transform: uppercase; letter-spacing: 0.06em; padding: var(--space-3) var(--space-3) var(--space-2); }
-.nav-item { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); font-size: var(--text-sm); color: var(--color-text-muted); cursor: pointer; }
-.nav-item:hover, .nav-item.active { background: var(--color-surface-offset); color: var(--color-text); }
-.nav-item.active { background: color-mix(in oklch, var(--color-primary) 10%, var(--color-surface)); color: var(--color-primary); font-weight: 500; }
-.sidebar-footer { padding: var(--space-4); border-top: 1px solid var(--color-divider); }
-.theme-toggle { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); font-size: var(--text-sm); color: var(--color-text-muted); width: 100%; cursor: pointer; }
-.main { margin-left: var(--sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100dvh; }
-.topbar { display: flex; align-items: center; justify-content: space-between; padding: var(--space-4) var(--space-8); border-bottom: 1px solid var(--color-divider); background: var(--color-surface); position: sticky; top: 0; z-index: 50; }
-.topbar-title { font-size: var(--text-lg); font-weight: 600; }
-.topbar-right { display: flex; align-items: center; gap: var(--space-4); }
-.status-badge { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-1) var(--space-3); border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 500; }
-.status-badge.live { background: var(--color-success-highlight); color: var(--color-success); }
-.status-badge.csv { background: var(--color-blue-highlight); color: var(--color-blue); }
-.status-badge.error { background: var(--color-error-highlight); color: var(--color-error); }
-.status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-.status-dot.pulse { animation: pulse 2s ease-in-out infinite; }
-@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-.refresh-btn { padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); background: var(--color-surface-offset); font-size: var(--text-xs); border: 1px solid var(--color-border); cursor: pointer; }
-.refresh-btn:hover { background: var(--color-border); }
-.content { padding: var(--space-8); display: flex; flex-direction: column; gap: var(--space-6); }
-.kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: var(--space-4); }
-.kpi-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-5); box-shadow: var(--shadow-sm); }
-.kpi-label { font-size: var(--text-xs); color: var(--color-text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
-.kpi-value { font-size: var(--text-xl); font-weight: 700; font-family: var(--font-mono); }
-.kpi-value.good { color: var(--color-success); } .kpi-value.warn { color: var(--color-warning); } .kpi-value.danger { color: var(--color-error); }
-.kpi-sub { font-size: var(--text-xs); color: var(--color-text-muted); }
-.panel { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; }
-.panel-header { padding: var(--space-4) var(--space-5); border-bottom: 1px solid var(--color-divider); }
-.panel-title { font-size: var(--text-base); font-weight: 600; }
-.panel-subtitle { font-size: var(--text-xs); color: var(--color-text-muted); margin-top: 2px; }
-.panel-body { padding: var(--space-5); }
-.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
-.chart-wrap { position: relative; height: 300px; }
-.tir-bar { display: flex; height: 32px; border-radius: var(--radius-sm); overflow: hidden; gap: 2px; }
-.tir-segment { display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: white; min-width: 2px; }
-.tir-legend { display: flex; gap: var(--space-4); margin-top: var(--space-3); font-size: var(--text-xs); color: var(--color-text-muted); }
-.tir-legend-item { display: flex; align-items: center; gap: var(--space-2); }
-.tir-dot { width: 10px; height: 10px; border-radius: 2px; }
-.badge { display: inline-flex; padding: 2px var(--space-2); border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 500; }
-.badge.red { background: var(--color-error-highlight); color: var(--color-error); }
-.badge.green { background: var(--color-success-highlight); color: var(--color-success); }
-.badge.orange { background: var(--color-orange-highlight); color: var(--color-orange); }
-.badge.blue { background: var(--color-blue-highlight); color: var(--color-blue); }
-.glucose-hero { display: flex; align-items: center; justify-content: space-between; padding: var(--space-5) var(--space-6); background: color-mix(in oklch, var(--color-primary) 6%, var(--color-surface)); border-radius: var(--radius-xl); margin-bottom: var(--space-2); }
-.glucose-number { font-size: 3.5rem; font-weight: 700; font-family: var(--font-mono); line-height: 1; }
-.glucose-unit { font-size: var(--text-xs); color: var(--color-text-muted); }
-.glucose-meta { display: flex; gap: var(--space-4); }
-.glucose-meta-item { text-align: center; }
-.glucose-meta-val { font-size: var(--text-sm); font-weight: 600; font-family: var(--font-mono); }
-.glucose-meta-label { font-size: 10px; color: var(--color-text-faint); text-transform: uppercase; }
-.pattern-table { width: 100%; border-collapse: collapse; }
-.pattern-table th { text-align: left; font-size: var(--text-xs); font-weight: 600; color: var(--color-text-muted); text-transform: uppercase; padding: var(--space-2) var(--space-4); border-bottom: 1px solid var(--color-divider); }
-.pattern-table td { padding: var(--space-3) var(--space-4); font-size: var(--text-sm); border-bottom: 1px solid var(--color-divider); }
-.rec-list { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-5); }
-.rec-item { display: flex; gap: var(--space-3); padding: var(--space-4); border-radius: var(--radius-md); background: var(--color-surface-offset); border-left: 3px solid; }
-.rec-item.high { border-left-color: var(--color-error); } .rec-item.med { border-left-color: var(--color-orange); } .rec-item.low { border-left-color: var(--color-success); }
-.rec-icon { font-size: 1.3rem; } .rec-text { flex: 1; line-height: 1.5; }
-.rec-priority { font-size: var(--text-xs); font-weight: 600; padding: 2px var(--space-2); border-radius: var(--radius-full); }
-.rec-priority.high { background: var(--color-error-highlight); color: var(--color-error); }
-.rec-priority.med { background: var(--color-orange-highlight); color: var(--color-orange); }
-.rec-priority.low { background: var(--color-success-highlight); color: var(--color-success); }
-.view { display: none; } .view.active { display: contents; }
-.alert-list { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-5); }
-.alert-item { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); font-size: var(--text-sm); }
-.alert-item.alert-danger { background: var(--color-error-highlight); } .alert-item.alert-warning { background: var(--color-warning-highlight); }
-.alert-item.alert-info { background: var(--color-blue-highlight); } .alert-item.alert-success { background: var(--color-success-highlight); }
-.alert-icon { font-size: 1.2rem; } .alert-title { font-weight: 600; margin-bottom: 2px; }
-.alert-title.danger { color: var(--color-error); } .alert-title.warning { color: var(--color-warning); }
-.alert-title.info { color: var(--color-blue); } .alert-title.success { color: var(--color-success); }
-.alert-desc { color: var(--color-text-muted); font-size: var(--text-xs); }
-.upload-zone { border: 2px dashed var(--color-border); border-radius: var(--radius-lg); padding: var(--space-6); text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: var(--space-4); }
-.upload-zone:hover { border-color: var(--color-primary); background: var(--color-surface-offset); }
-.upload-zone.dragover { border-color: var(--color-success); background: var(--color-success-highlight); }
-.hamburger { display: none; padding: var(--space-2); }
-.sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
-@media (max-width: 768px) { .sidebar { transform: translateX(-100%); } .sidebar.open { transform: translateX(0); } .sidebar-overlay.open { display: block; } .main { margin-left: 0; } .hamburger { display: flex; } .topbar, .content { padding: var(--space-4); } .kpi-grid { grid-template-columns: repeat(2, 1fr); } .two-col { grid-template-columns: 1fr; } }
-.data-source-indicator { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-1) var(--space-3); border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 500; margin-left: var(--space-2); }
-.data-source-indicator.nightscout { background: var(--color-success-highlight); color: var(--color-success); }
-.data-source-indicator.csv { background: var(--color-blue-highlight); color: var(--color-blue); }
+:root,[data-theme="light"]{--bg:#f7f6f2;--surface:#f9f8f5;--surface-offset:#f3f0ec;--divider:#dcd9d5;--border:#d4d1ca;--text:#28251d;--text-muted:#7a7974;--text-faint:#bab9b4;--primary:#01696f;--success:#437a22;--success-hl:#d4dfcc;--warning:#964219;--warning-hl:#ddcfc6;--error:#a12c7b;--error-hl:#e0ced7;--orange:#da7101;--orange-hl:#e7d7c4;--blue:#006494;--blue-hl:#c6d8e4;--shadow:0 1px 2px oklch(0.2 0.01 80 / 0.06);--sm:0.375rem;--md:0.5rem;--lg:0.75rem;--xl:1rem;--text-xs:0.75rem;--text-sm:0.875rem;--text-base:1rem;--text-lg:1.125rem;--text-xl:1.5rem;--space:0.25rem}
+[data-theme="dark"]{--bg:#171614;--surface:#1c1b19;--surface-offset:#1d1c1a;--divider:#262523;--border:#393836;--text:#cdccca;--text-muted:#797876;--text-faint:#5a5957;--primary:#4f98a3;--success:#6daa45;--success-hl:#3a4435;--warning:#bb653b;--warning-hl:#564942;--error:#d163a7;--error-hl:#4c3d46;--orange:#fdab43;--orange-hl:#564b3e;--blue:#5591c7;--blue-hl:#3a4550}
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100dvh;font-family:Inter,sans-serif;font-size:var(--text-base);color:var(--text);background:var(--bg)}
+button{cursor:pointer;background:none;border:none;font:inherit;color:inherit}
+.sidebar{width:240px;min-height:100dvh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;overflow-y:auto}
+.sidebar-logo{padding:1.25rem;border-bottom:1px solid var(--divider)}
+.sidebar-logo-text{font-size:var(--text-sm);font-weight:600}
+.sidebar-logo-sub{font-size:var(--text-xs);color:var(--text-muted)}
+.sidebar-nav{flex:1;padding:1rem 0.75rem;display:flex;flex-direction:column;gap:0.25rem}
+.nav-section-label{font-size:var(--text-xs);font-weight:600;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.06em;padding:0.75rem 0.75rem 0.5rem}
+.nav-item{display:flex;align-items:center;gap:0.75rem;padding:0.5rem 0.75rem;border-radius:var(--md);font-size:var(--text-sm);color:var(--text-muted);cursor:pointer}
+.nav-item:hover,.nav-item.active{background:var(--surface-offset);color:var(--text)}
+.nav-item.active{background:color-mix(in oklch,var(--primary) 10%,var(--surface));color:var(--primary);font-weight:500}
+.sidebar-footer{padding:1rem;border-top:1px solid var(--divider)}
+.theme-toggle{display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.75rem;border-radius:var(--md);font-size:var(--text-sm);color:var(--text-muted);width:100%;cursor:pointer}
+.main{margin-left:240px;flex:1;display:flex;flex-direction:column;min-height:100dvh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:1rem 2rem;border-bottom:1px solid var(--divider);background:var(--surface);position:sticky;top:0;z-index:50}
+.topbar-title{font-size:var(--text-lg);font-weight:600}
+.topbar-right{display:flex;align-items:center;gap:1rem}
+.status-badge{display:flex;align-items:center;gap:0.5rem;padding:0.25rem 0.75rem;border-radius:9999px;font-size:var(--text-xs);font-weight:500}
+.status-badge.live{background:var(--success-hl);color:var(--success)}
+.status-badge.csv{background:var(--blue-hl);color:var(--blue)}
+.status-badge.error{background:var(--error-hl);color:var(--error)}
+.status-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.status-dot.pulse{animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.refresh-btn{padding:0.5rem 0.75rem;border-radius:var(--md);background:var(--surface-offset);font-size:var(--text-xs);border:1px solid var(--border);cursor:pointer}
+.refresh-btn:hover{background:var(--border)}
+.content{padding:2rem;display:flex;flex-direction:column;gap:1.5rem}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--lg);padding:1.25rem;box-shadow:var(--shadow)}
+.kpi-label{font-size:var(--text-xs);color:var(--text-muted);font-weight:500;text-transform:uppercase;letter-spacing:0.05em}
+.kpi-value{font-size:var(--text-xl);font-weight:700;font-family:JetBrains Mono,monospace}
+.kpi-value.good{color:var(--success)}.kpi-value.warn{color:var(--warning)}.kpi-value.danger{color:var(--error)}
+.kpi-sub{font-size:var(--text-xs);color:var(--text-muted)}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--lg);overflow:hidden}
+.panel-header{padding:1rem 1.25rem;border-bottom:1px solid var(--divider)}
+.panel-title{font-size:var(--text-base);font-weight:600}
+.panel-subtitle{font-size:var(--text-xs);color:var(--text-muted);margin-top:2px}
+.panel-body{padding:1.25rem}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.chart-wrap{position:relative;height:300px}
+.tir-bar{display:flex;height:32px;border-radius:var(--sm);overflow:hidden;gap:2px}
+.tir-segment{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:white;min-width:2px}
+.tir-legend{display:flex;gap:1rem;margin-top:0.75rem;font-size:var(--text-xs);color:var(--text-muted)}
+.tir-legend-item{display:flex;align-items:center;gap:0.5rem}
+.tir-dot{width:10px;height:10px;border-radius:2px}
+.badge{display:inline-flex;padding:2px 0.5rem;border-radius:9999px;font-size:var(--text-xs);font-weight:500}
+.badge.red{background:var(--error-hl);color:var(--error)}.badge.green{background:var(--success-hl);color:var(--success)}.badge.orange{background:var(--orange-hl);color:var(--orange)}.badge.blue{background:var(--blue-hl);color:var(--blue)}
+.glucose-hero{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;background:color-mix(in oklch,var(--primary) 6%,var(--surface));border-radius:1rem;margin-bottom:0.5rem}
+.glucose-number{font-size:3.5rem;font-weight:700;font-family:JetBrains Mono,monospace;line-height:1}
+.glucose-unit{font-size:var(--text-xs);color:var(--text-muted)}
+.glucose-meta{display:flex;gap:1rem}
+.glucose-meta-item{text-align:center}
+.glucose-meta-val{font-size:var(--text-sm);font-weight:600;font-family:JetBrains Mono,monospace}
+.glucose-meta-label{font-size:10px;color:var(--text-faint);text-transform:uppercase}
+.pattern-table{width:100%;border-collapse:collapse}
+.pattern-table th{text-align:left;font-size:var(--text-xs);font-weight:600;color:var(--text-muted);text-transform:uppercase;padding:0.5rem 1rem;border-bottom:1px solid var(--divider)}
+.pattern-table td{padding:0.75rem 1rem;font-size:var(--text-sm);border-bottom:1px solid var(--divider)}
+.rec-list{display:flex;flex-direction:column;gap:0.75rem;padding:1.25rem}
+.rec-item{display:flex;gap:0.75rem;padding:1rem;border-radius:var(--md);background:var(--surface-offset);border-left:3px solid}
+.rec-item.high{border-left-color:var(--error)}.rec-item.med{border-left-color:var(--orange)}.rec-item.low{border-left-color:var(--success)}
+.rec-icon{font-size:1.3rem}.rec-text{flex:1;line-height:1.5}
+.rec-priority{font-size:var(--text-xs);font-weight:600;padding:2px 0.5rem;border-radius:9999px}
+.rec-priority.high{background:var(--error-hl);color:var(--error)}.rec-priority.med{background:var(--orange-hl);color:var(--orange)}.rec-priority.low{background:var(--success-hl);color:var(--success)}
+.view{display:none}.view.active{display:contents}
+.alert-list{display:flex;flex-direction:column;gap:0.75rem;padding:1.25rem}
+.alert-item{display:flex;align-items:flex-start;gap:0.75rem;padding:0.75rem 1rem;border-radius:var(--md);font-size:var(--text-sm)}
+.alert-item.alert-danger{background:var(--error-hl)}.alert-item.alert-warning{background:var(--warning-hl)}.alert-item.alert-info{background:var(--blue-hl)}.alert-item.alert-success{background:var(--success-hl)}
+.alert-icon{font-size:1.2rem}.alert-title{font-weight:600;margin-bottom:2px}
+.alert-title.danger{color:var(--error)}.alert-title.warning{color:var(--warning)}.alert-title.info{color:var(--blue)}.alert-title.success{color:var(--success)}
+.alert-desc{color:var(--text-muted);font-size:var(--text-xs)}
+.upload-zone{border:2px dashed var(--border);border-radius:var(--lg);padding:1.5rem;text-align:center;cursor:pointer;transition:all 0.2s;margin-bottom:1rem}
+.upload-zone:hover{border-color:var(--primary);background:var(--surface-offset)}
+.upload-zone.dragover{border-color:var(--success);background:var(--success-hl)}
+.hamburger{display:none;padding:0.5rem}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99}
+.data-source-indicator{display:inline-flex;align-items:center;gap:0.5rem;padding:0.25rem 0.75rem;border-radius:9999px;font-size:var(--text-xs);font-weight:500;margin-left:0.5rem}
+.data-source-indicator.nightscout{background:var(--success-hl);color:var(--success)}
+.data-source-indicator.csv{background:var(--blue-hl);color:var(--blue)}
+@media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.sidebar-overlay.open{display:block}.main{margin-left:0}.hamburger{display:flex}.topbar,.content{padding:1rem}.kpi-grid{grid-template-columns:repeat(2,1fr)}.two-col{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -129,65 +100,56 @@ button { cursor: pointer; background: none; border: none; font: inherit; color: 
   <div class="sidebar-logo">
     <div>
       <div class="sidebar-logo-text">GlucoAgent</div>
-      <div class="sidebar-logo-sub">Arinelis • iAPS</div>
+      <div class="sidebar-logo-sub">Arinelis - iAPS</div>
     </div>
   </div>
 
   <div class="sidebar-nav">
     <div class="nav-section-label">Dashboard</div>
-    <div class="nav-item active" onclick="switchView('dashboard', this)">📊 Overzicht</div>
-    <div class="nav-item" onclick="switchView('trends', this)">📈 Trends</div>
-    <div class="nav-item" onclick="switchView('uitschieters', this)">⚡ Uitschieters</div>
-    <div class="nav-item" onclick="switchView('advies', this)">💡 Persoonlijk Advies</div>
+    <div class="nav-item active" onclick="switchView('dashboard', this)">Overzicht</div>
+    <div class="nav-item" onclick="switchView('trends', this)">Trends</div>
+    <div class="nav-item" onclick="switchView('uitschieters', this)">Uitschieters</div>
+    <div class="nav-item" onclick="switchView('advies', this)">Advies</div>
   </div>
 
   <div class="sidebar-footer">
-    <button class="theme-toggle" onclick="toggleTheme()">🌓 Dark mode</button>
+    <button class="theme-toggle" onclick="toggleTheme()">Dark mode</button>
   </div>
 </nav>
 
 <div class="main">
   <header class="topbar">
-    <div style="display:flex;align-items:center;gap:var(--space-3);">
-      <button class="hamburger" onclick="toggleSidebar()">☰</button>
+    <div style="display:flex;align-items:center;gap:0.75rem;">
+      <button class="hamburger" onclick="toggleSidebar()">Menu</button>
       <span class="topbar-title" id="pageTitle">Overzicht</span>
       <span class="data-source-indicator" id="dataSource" style="display:none;">--</span>
     </div>
     <div class="topbar-right">
-      <button class="refresh-btn" onclick="refreshData()">🔄 Verversen</button>
+      <button class="refresh-btn" onclick="refreshData()">Verversen</button>
       <div class="status-badge live" id="statusBadge"><div class="status-dot pulse"></div><span id="statusText">Laden...</span></div>
     </div>
   </header>
 
   <main class="content">
     
-    <!-- DASHBOARD VIEW -->
     <div class="view active" id="view-dashboard">
       
-      <!-- CSV Upload Zone (only shown when no data) -->
-      <div id="uploadZone" class="upload-zone" onclick="document.getElementById('fileInput').click()">
-        <div style="font-size:1.5rem;margin-bottom:var(--space-2);">📁</div>
-        <div style="font-weight:600;margin-bottom:var(--space-2);">Upload historische data (optioneel)</div>
-        <div style="color:var(--color-text-muted);font-size:var(--text-sm);">Sleep je Dexcom Clarity CSV hierheen voor langere historie</div>
-        <input type="file" id="fileInput" accept=".csv" style="display:none" onchange="handleCSVFile(this.files[0])">
-      </div>
-
       <div class="glucose-hero">
         <div>
-          <div class="glucose-number" id="liveGlucose" style="color:var(--color-success);">--</div>
+          <div class="glucose-number" id="liveGlucose" style="color:var(--success);">--</div>
           <div class="glucose-unit" id="glucoseUnit">mmol/L</div>
         </div>
         <div class="glucose-meta">
-          <div class="glucose-meta-item"><div class="glucose-meta-val" id="tirInRange" style="color:var(--color-success);">--</div><div class="glucose-meta-label">In Doel</div></div>
-          <div class="glucose-meta-item"><div class="glucose-meta-val" id="tirHigh" style="color:var(--color-warning);">--</div><div class="glucose-meta-label">Hoog</div></div>
-          <div class="glucose-meta-item"><div class="glucose-meta-val" id="tirLow" style="color:var(--color-error);">--</div><div class="glucose-meta-label">Laag</div></div>
+          <div class="glucose-meta-item"><div class="glucose-meta-val" id="tirInRange" style="color:var(--success);">--</div><div class="glucose-meta-label">In Doel</div></div>
+          <div class="glucose-meta-item"><div class="glucose-meta-val" id="tirHigh" style="color:var(--warning);">--</div><div class="glucose-meta-label">Hoog</div></div>
+          <div class="glucose-meta-item"><div class="glucose-meta-val" id="tirLow" style="color:var(--error);">--</div><div class="glucose-meta-label">Laag</div></div>
         </div>
       </div>
 
       <div class="kpi-grid">
         <div class="kpi-card"><div class="kpi-label">GMI</div><div class="kpi-value" id="gmi">--</div><div class="kpi-sub">Geschat HbA1c</div></div>
         <div class="kpi-card"><div class="kpi-label">Gemiddelde</div><div class="kpi-value" id="avgGlucose">--</div><div class="kpi-sub" id="stdDevSub">--</div></div>
-        <div class="kpi-card"><div class="kpi-label">CV</div><div class="kpi-value" id="cv">--</div><div class="kpi-sub">Doel &lt;36%</div></div>
+        <div class="kpi-card"><div class="kpi-label">CV</div><div class="kpi-value" id="cv">--</div><div class="kpi-sub">Doel onder 36%</div></div>
         <div class="kpi-card"><div class="kpi-label">Nachtelijke hypo</div><div class="kpi-value" id="nightHypos">--</div><div class="kpi-sub">00:00 - 06:00</div></div>
         <div class="kpi-card"><div class="kpi-label">Dagen data</div><div class="kpi-value" id="daysOfData">--</div><div class="kpi-sub">Periode</div></div>
         <div class="kpi-card"><div class="kpi-label">Metingen</div><div class="kpi-value" id="totalMeasurements">--</div><div class="kpi-sub">Totaal</div></div>
@@ -202,21 +164,20 @@ button { cursor: pointer; background: none; border: none; font: inherit; color: 
           <div class="panel-header"><div class="panel-title">Time in Range</div></div>
           <div class="panel-body">
             <div class="tir-bar" id="tirBar">
-              <div class="tir-segment" id="tirLowBar" style="background:#dc2626;flex:0;">&lt;3.9</div>
-              <div class="tir-segment" id="tirInRangeBar" style="background:var(--color-success);flex:1;">100%</div>
-              <div class="tir-segment" id="tirHighBar" style="background:var(--color-orange);flex:0;">&gt;10</div>
+              <div class="tir-segment" id="tirLowBar" style="background:#dc2626;flex:0;">3.9</div>
+              <div class="tir-segment" id="tirInRangeBar" style="background:var(--success);flex:1;">100%</div>
+              <div class="tir-segment" id="tirHighBar" style="background:var(--orange);flex:0;">10</div>
             </div>
             <div class="tir-legend">
-              <div class="tir-legend-item"><div class="tir-dot" style="background:#dc2626;"></div>Laag (&lt;3.9): <span id="lowPct">0%</span></div>
-              <div class="tir-legend-item"><div class="tir-dot" style="background:var(--color-success);"></div>In doel: <span id="rangePct">100%</span></div>
-              <div class="tir-legend-item"><div class="tir-dot" style="background:var(--color-orange);"></div>Hoog (&gt;10): <span id="highPct">0%</span></div>
+              <div class="tir-legend-item"><div class="tir-dot" style="background:#dc2626;"></div>Laag (<3.9): <span id="lowPct">0%</span></div>
+              <div class="tir-legend-item"><div class="tir-dot" style="background:var(--success);"></div>In doel: <span id="rangePct">100%</span></div>
+              <div class="tir-legend-item"><div class="tir-dot" style="background:var(--orange);"></div>Hoog (>10): <span id="highPct">0%</span></div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- TRENDS VIEW -->
     <div class="view" id="view-trends">
       <div class="panel">
         <div class="panel-header"><div class="panel-title">Glucose Overzicht - Alle Dagen</div></div>
@@ -234,33 +195,30 @@ button { cursor: pointer; background: none; border: none; font: inherit; color: 
       </div>
     </div>
 
-    <!-- UITSCHETERS VIEW -->
     <div class="view" id="view-uitschieters">
       <div class="kpi-grid">
-        <div class="kpi-card"><div class="kpi-label">Hyper Episodes</div><div class="kpi-value warn" id="hyperCount">--</div><div class="kpi-sub">&gt;13.9 mmol/L</div></div>
-        <div class="kpi-card"><div class="kpi-label">Hypo Episodes</div><div class="kpi-value danger" id="hypoCount">--</div><div class="kpi-sub">&lt;3.0 mmol/L</div></div>
-        <div class="kpi-card"><div class="kpi-label">Snelle Stijgers</div><div class="kpi-value" id="rapidRiseCount">--</div><div class="kpi-sub">&gt;0.1 mmol/min</div></div>
-        <div class="kpi-card"><div class="kpi-label">Snelle Dalers</div><div class="kpi-value" id="rapidFallCount">--</div><div class="kpi-sub">&gt;0.1 mmol/min</div></div>
+        <div class="kpi-card"><div class="kpi-label">Hyper Episodes</div><div class="kpi-value warn" id="hyperCount">--</div><div class="kpi-sub">boven 13.9 mmol/L</div></div>
+        <div class="kpi-card"><div class="kpi-label">Hypo Episodes</div><div class="kpi-value danger" id="hypoCount">--</div><div class="kpi-sub">onder 3.0 mmol/L</div></div>
+        <div class="kpi-card"><div class="kpi-label">Snelle Stijgers</div><div class="kpi-value" id="rapidRiseCount">--</div><div class="kpi-sub">boven 0.1 mmol/min</div></div>
+        <div class="kpi-card"><div class="kpi-label">Snelle Dalers</div><div class="kpi-value" id="rapidFallCount">--</div><div class="kpi-sub">onder -0.1 mmol/min</div></div>
       </div>
       <div class="panel">
-        <div class="panel-header"><div class="panel-title">💡 Aanbevelingen om Uitschieters te Voorkomen</div></div>
-        <div class="rec-list" id="spikeRecs"><div class="rec-item low"><div class="rec-icon">⏳</div><div class="rec-text">Data laden...</div><div class="rec-priority low">Laden</div></div></div>
+        <div class="panel-header"><div class="panel-title">Aanbevelingen om Uitschieters te Voorkomen</div></div>
+        <div class="rec-list" id="spikeRecs"><div class="rec-item low"><div class="rec-icon">-</div><div class="rec-text">Data laden...</div><div class="rec-priority low">Laden</div></div></div>
       </div>
     </div>
 
-    <!-- ADVISE VIEW -->
     <div class="view" id="view-advies">
       <div class="panel">
-        <div class="panel-header"><div class="panel-title">🤖 Persoonlijk Glucosecoach Advies</div></div>
-        <div class="rec-list" id="adviesList"><div class="rec-item low"><div class="rec-icon">⏳</div><div class="rec-text">Data laden...</div><div class="rec-priority low">Laden</div></div></div>
+        <div class="panel-header"><div class="panel-title">Persoonlijk Glucosecoach Advies</div></div>
+        <div class="rec-list" id="adviesList"><div class="rec-item low"><div class="rec-icon">-</div><div class="rec-text">Data laden...</div><div class="rec-priority low">Laden</div></div></div>
       </div>
       <div class="panel">
-        <div class="panel-header"><div class="panel-title">📊 Begrippen</div></div>
-        <div class="panel-body" style="font-size:var(--text-sm);color:var(--color-text-muted);">
-          <div style="margin-bottom:var(--space-3);"><strong>TIR:</strong> Time in Range - % tijd in doelbereik (3.9-10 mmol/L). Doel: 70%+</div>
-          <div style="margin-bottom:var(--space-3);"><strong>CV:</strong> Coefficient of Variation - glucose variabiliteit. Doel: &lt;36%</div>
-          <div style="margin-bottom:var(--space-3);"><strong>GMI:</strong> Glucose Management Indicator - geschat HbA1c. Doel: &lt;7%</div>
-          <div><strong>Hyper:</strong> Glucose &gt;13.9 mmol/L. <strong>Hypo:</strong> Glucose &lt;3.0 mmol/L.</div>
+        <div class="panel-header"><div class="panel-title">Begrippen</div></div>
+        <div class="panel-body" style="font-size:var(--text-sm);color:var(--text-muted);">
+          <div style="margin-bottom:0.75rem;"><strong>TIR:</strong> Time in Range - percentage tijd in doelbereik (3.9-10 mmol/L). Doel: 70%+</div>
+          <div style="margin-bottom:0.75rem;"><strong>CV:</strong> Coefficient of Variation - glucose variabiliteit. Doel: onder 36%</div>
+          <div><strong>GMI:</strong> Glucose Management Indicator - geschat HbA1c. Doel: onder 7%</div>
         </div>
       </div>
     </div>
@@ -269,354 +227,131 @@ button { cursor: pointer; background: none; border: none; font: inherit; color: 
 </div>
 
 <script>
-// ============================================================
-// CONFIGURATIE
-// ============================================================
-const CONFIG = {
-  nightscoutUrl: 'https://arinelis.10be.de/',
-  token: 'nsread-bf4271c2d5b495b4'
-};
+var CONFIG = { nightscoutUrl: "https://arinelis.10be.de/", token: "nsread-bf4271c2d5b495b4" };
+var THRESHOLDS = { veryLow: 3.0, low: 3.9, high: 10.0, veryHigh: 13.9 };
+var allData = [];
+var analysisResults = {};
+var dailyChart, monthlyChart, weeklyChart, dailyAvgChart;
 
-// ============================================================
-// GLOBALE VARIABELEN
-// ============================================================
-let csvData = []; // Historische CSV data
-let allData = []; // Alle data (CSV + Nightscout)
-let analysisResults = {};
-let dataSource = 'nightscout'; // 'nightscout', 'csv', of 'merged'
-let dailyChart, monthlyChart, weeklyChart, dailyAvgChart;
-
-// THRESHOLDS
-const THRESHOLDS = { veryLow: 3.0, low: 3.9, high: 10.0, veryHigh: 13.9 };
-
-// ============================================================
-// API FUNCTIONS
-// ============================================================
-async function fetchNightscout(endpoint) {
-  const baseUrl = CONFIG.nightscoutUrl + 'api/v1/' + endpoint + '&token=' + CONFIG.token;
-  
-  try {
-    const res = await fetch(baseUrl, { 
-      headers: { 'Accept': 'application/json' }
-    });
-    if (res.ok) {
-      const text = await res.text();
+function fetchNightscout(endpoint) {
+  var baseUrl = CONFIG.nightscoutUrl + "api/v1/" + endpoint + "&token=" + CONFIG.token;
+  return fetch(baseUrl, { headers: { "Accept": "application/json" } })
+    .then(function(res) {
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return res.text();
+    })
+    .then(function(text) {
       try { return JSON.parse(text); }
-      catch {
-        const lines = text.trim().split('\n');
-        return lines.map(line => {
-          const parts = line.split('\t');
-          return { date: parts[0], dateString: parts[0], sgv: parseInt(parts[2]), direction: parts[3]?.replace(/"/g, '') || '' };
+      catch(e) {
+        var lines = text.trim().split("\n");
+        return lines.map(function(line) {
+          var parts = line.split("\t");
+          return { date: parts[0], dateString: parts[0], sgv: parseInt(parts[2]) };
         });
       }
-    }
-  } catch(e) { console.log('Fetch error:', e.message); }
-  
-  return null;
+    })
+    .catch(function(e) { console.log("Fetch error:", e.message); return null; });
 }
 
-// ============================================================
-// DATA LADEN
-// ============================================================
 async function refreshData() {
-  document.getElementById('statusText').textContent = 'Laden...';
-  
-  // Haal Nightscout data op
-  const entries = await fetchNightscout('entries?count=10000');
-  
+  document.getElementById("statusText").textContent = "Laden...";
+  var entries = await fetchNightscout("entries?count=10000");
   if (!entries || entries.length === 0) {
-    document.getElementById('statusText').textContent = 'Geen Nightscout data';
-    document.getElementById('statusBadge').className = 'status-badge error';
+    document.getElementById("statusText").textContent = "Geen Nightscout data";
+    document.getElementById("statusBadge").className = "status-badge error";
     return;
   }
+  allData = entries
+    .map(function(e) { return { date: new Date(e.date || e.dateString), sgv: e.sgv }; })
+    .filter(function(e) { return e.sgv && e.date && !isNaN(e.date.getTime()); })
+    .sort(function(a, b) { return a.date - b.date; });
   
-  // Converteer Nightscout entries
-  const nightscoutData = entries
-    .map(e => ({ date: new Date(e.date || e.dateString), sgv: e.sgv, source: 'nightscout' }))
-    .filter(e => e.sgv && e.date && !isNaN(e.date.getTime()));
+  var oldest = allData[0].date;
+  var newest = allData[allData.length - 1].date;
+  var days = Math.round((newest - oldest) / (1000 * 60 * 60 * 24));
   
-  if (csvData.length > 0) {
-    // Merge CSV en Nightscout data
-    allData = [...csvData];
-    
-    // Voeg alleen nieuwe Nightscout data toe
-    const csvTimestamps = new Set(csvData.map(d => d.date.getTime()));
-    nightscoutData.forEach(ns => {
-      if (!csvTimestamps.has(ns.date.getTime())) {
-        allData.push(ns);
-      }
-    });
-    
-    // Sorteer en verwijder duplicates
-    allData.sort((a, b) => a.date - b.date);
-    const seen = new Map();
-    allData = allData.filter(d => {
-      const key = d.date.getTime();
-      if (!seen.has(key)) { seen.set(key, d); return true; }
-      return false;
-    });
-    
-    dataSource = 'merged';
-    document.getElementById('uploadZone').style.display = 'none';
-    document.getElementById('statusBadge').className = 'status-badge csv';
-    document.getElementById('dataSource').textContent = '📊 + 📡 CSV + Live';
-    document.getElementById('dataSource').className = 'data-source-indicator csv';
-    
-    const days = Math.round((allData[allData.length - 1].date - allData[0].date) / (1000 * 60 * 60 * 24));
-    document.getElementById('statusText').textContent = csvData.length + ' CSV + live = ' + days + ' dagen';
-  } else {
-    // Alleen Nightscout
-    allData = nightscoutData;
-    dataSource = 'nightscout';
-    document.getElementById('statusBadge').className = 'status-badge live';
-    document.getElementById('dataSource').textContent = '📡 Nightscout Live';
-    document.getElementById('dataSource').className = 'data-source-indicator nightscout';
-    
-    const oldest = allData[0].date;
-    const newest = allData[allData.length - 1].date;
-    const days = Math.round((newest - oldest) / (1000 * 60 * 60 * 24));
-    
-    if (days < 7) {
-      document.getElementById('uploadZone').style.display = 'block';
-      document.getElementById('statusText').textContent = 'Maar ' + days + ' dagen - upload CSV voor meer historie';
-    } else {
-      document.getElementById('uploadZone').style.display = 'none';
-      document.getElementById('statusText').textContent = days + ' dagen live data';
-    }
-  }
-  
-  document.getElementById('dataSource').style.display = 'inline-flex';
+  document.getElementById("statusBadge").className = "status-badge live";
+  document.getElementById("dataSource").textContent = "Nightscout";
+  document.getElementById("dataSource").className = "data-source-indicator nightscout";
+  document.getElementById("dataSource").style.display = "inline-flex";
+  document.getElementById("statusText").textContent = days + " dagen data";
   
   analyzeData();
   updateDashboard();
   updateTrends();
   updateUitschieters();
   updateAdvies();
-  
-  // Auto refresh elke 5 min
   setTimeout(refreshData, 5 * 60 * 1000);
 }
 
-// ============================================================
-// CSV HANDLING
-// ============================================================
-function handleCSVFile(file) {
-  if (!file || !file.name.endsWith('.csv')) {
-    alert('Selecteer een CSV bestand van Dexcom Clarity');
-    return;
-  }
-  
-  document.getElementById('statusText').textContent = 'CSV verwerken...';
-  
-  const reader = new FileReader();
-  reader.onload = e => {
-    try {
-      parseCSV(e.target.result);
-    } catch(err) {
-      alert('Fout bij verwerken: ' + err.message);
-    }
-  };
-  reader.readAsText(file);
-}
-
-async function loadAndMergeData() {
-  document.getElementById('statusText').textContent = 'Nightscout data laden...';
-  
-  const entries = await fetchNightscout('entries?count=10000');
-  
-  if (!entries || entries.length === 0) {
-    // Geen Nightscout, gebruik alleen CSV
-    allData = [...csvData];
-    dataSource = 'csv';
-    document.getElementById('uploadZone').style.display = 'none';
-    document.getElementById('statusBadge').className = 'status-badge csv';
-    document.getElementById('dataSource').textContent = '📁 CSV Import';
-    document.getElementById('dataSource').className = 'data-source-indicator csv';
-  } else {
-    // Merge CSV en Nightscout
-    const nightscoutData = entries
-      .map(e => ({ date: new Date(e.date || e.dateString), sgv: e.sgv, source: 'nightscout' }))
-      .filter(e => e.sgv && e.date && !isNaN(e.date.getTime()));
-    
-    // Combineer
-    allData = [...csvData, ...nightscoutData];
-    
-    // Verwijder duplicates (houd nieuwste per tijdstip)
-    const seen = new Map();
-    allData.sort((a, b) => a.date - b.date);
-    allData = allData.filter(d => {
-      const key = d.date.getTime();
-      if (!seen.has(key)) { seen.set(key, d); return true; }
-      return false;
-    });
-    
-    dataSource = 'merged';
-    document.getElementById('uploadZone').style.display = 'none';
-    document.getElementById('statusBadge').className = 'status-badge csv';
-    document.getElementById('dataSource').textContent = '📊 + 📡 CSV + Live';
-    document.getElementById('dataSource').className = 'data-source-indicator csv';
-  }
-  
-  // Toon info
-  if (allData.length > 0) {
-    const oldest = allData[0].date;
-    const newest = allData[allData.length - 1].date;
-    const days = Math.round((newest - oldest) / (1000 * 60 * 60 * 24));
-    document.getElementById('statusText').textContent = csvData.length + ' CSV + ' + (allData.length - csvData.length) + ' live = ' + days + ' dagen';
-  }
-  
-  document.getElementById('dataSource').style.display = 'inline-flex';
-  
-  analyzeData();
-  updateDashboard();
-  updateTrends();
-  updateUitschieters();
-  updateAdvies();
-  
-  // Auto refresh elke 5 min
-  setTimeout(refreshData, 5 * 60 * 1000);
-}
-
-function parseCSV(text) {
-  const lines = text.split('\n');
-  csvData = [];
-  
-  for (let i = 1; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (!line) continue;
-    
-    const parts = line.match(/(".*?"|[^;]+)(?=\s*;|\s*$)/g) || [];
-    const clean = parts.map(p => p.replace(/^"|"$/g, '').trim());
-    
-    if (clean[2] === 'EGV' && clean[1] && clean[7]) {
-      const glucose = parseFloat(clean[7].replace(',', '.'));
-      if (!isNaN(glucose)) {
-        csvData.push({ date: new Date(clean[1]), sgv: glucose, source: 'csv' });
-      }
-    }
-  }
-  
-  csvData.sort((a, b) => a.date - b.date);
-  
-  if (csvData.length === 0) throw new Error('Geen glucose data gevonden');
-  
-  // Nu Nightscout data laden en samenvoegen
-  loadAndMergeData();
-}
-
-// ============================================================
-// ANALYSE
-// ============================================================
 function analyzeData() {
-  const values = allData.map(d => d.sgv);
-  const mean = values.reduce((a, b) => a + b, 0) / values.length;
-  const variance = values.reduce((a, v) => a + Math.pow(v - mean, 2), 0) / values.length;
-  const stdDev = Math.sqrt(variance);
-  const cv = (stdDev / mean) * 100;
-  const gmi = 8.5 + cv * 0.1;
-  
-  const veryLow = values.filter(v => v < THRESHOLDS.veryLow).length;
-  const low = values.filter(v => v >= THRESHOLDS.veryLow && v < THRESHOLDS.low).length;
-  const inRange = values.filter(v => v >= THRESHOLDS.low && v <= THRESHOLDS.high).length;
-  const high = values.filter(v => v > THRESHOLDS.high && v <= THRESHOLDS.veryHigh).length;
-  const veryHigh = values.filter(v => v > THRESHOLDS.veryHigh).length;
-  const total = values.length;
-  
-  const nightHypos = allData.filter(d => {
-    const h = d.date.getHours();
-    return h >= 0 && h < 6 && d.sgv < THRESHOLDS.low;
-  }).length;
-  
-  const hyper = values.filter(v => v > THRESHOLDS.veryHigh).length;
-  const hypo = values.filter(v => v < THRESHOLDS.veryLow).length;
-  
-  let rapidRise = 0, rapidFall = 0;
-  for (let i = 1; i < allData.length; i++) {
-    const timeDiff = (allData[i].date - allData[i-1].date) / 60000;
+  var values = allData.map(function(d) { return d.sgv; });
+  var mean = values.reduce(function(a, b) { return a + b; }, 0) / values.length;
+  var variance = values.reduce(function(a, v) { return a + Math.pow(v - mean, 2); }, 0) / values.length;
+  var stdDev = Math.sqrt(variance);
+  var cv = (stdDev / mean) * 100;
+  var gmi = 8.5 + cv * 0.1;
+  var veryLow = values.filter(function(v) { return v < THRESHOLDS.veryLow; }).length;
+  var low = values.filter(function(v) { return v >= THRESHOLDS.veryLow && v < THRESHOLDS.low; }).length;
+  var inRange = values.filter(function(v) { return v >= THRESHOLDS.low && v <= THRESHOLDS.high; }).length;
+  var high = values.filter(function(v) { return v > THRESHOLDS.high && v <= THRESHOLDS.veryHigh; }).length;
+  var veryHigh = values.filter(function(v) { return v > THRESHOLDS.veryHigh; }).length;
+  var total = values.length;
+  var nightHypos = allData.filter(function(d) { return d.date.getHours() >= 0 && d.date.getHours() < 6 && d.sgv < THRESHOLDS.low; }).length;
+  var hyper = values.filter(function(v) { return v > THRESHOLDS.veryHigh; }).length;
+  var hypo = values.filter(function(v) { return v < THRESHOLDS.veryLow; }).length;
+  var rapidRise = 0, rapidFall = 0;
+  for (var i = 1; i < allData.length; i++) {
+    var timeDiff = (allData[i].date - allData[i-1].date) / 60000;
     if (timeDiff > 0 && timeDiff < 15) {
-      const rate = (allData[i].sgv - allData[i-1].sgv) / timeDiff;
+      var rate = (allData[i].sgv - allData[i-1].sgv) / timeDiff;
       if (rate > 0.1) rapidRise++;
       if (rate < -0.1) rapidFall++;
     }
   }
-  
-  const first = allData[0].date;
-  const last = allData[allData.length - 1].date;
-  const daysOfData = Math.round((last - first) / (1000 * 60 * 60 * 24));
-  
-  const hourlyAvg = Array(24).fill(0), hourlyCount = Array(24).fill(0);
-  allData.forEach(d => { const h = d.date.getHours(); hourlyAvg[h] += d.sgv; hourlyCount[h]++; });
-  const hourlyValues = hourlyAvg.map((sum, i) => hourlyCount[i] > 0 ? sum / hourlyCount[i] : null);
-  
-  analysisResults = {
-    mean, stdDev, cv, gmi, total,
-    tir: { veryLow, low, inRange, high, veryHigh, total },
-    tirPct: { low: ((veryLow + low) / total * 100).toFixed(1), inRange: (inRange / total * 100).toFixed(1), high: ((high + veryHigh) / total * 100).toFixed(1) },
-    nightHypos, hyper, hypo, rapidRise, rapidFall,
-    latest: allData[allData.length - 1],
-    firstDate: first, lastDate: last, daysOfData, hourlyValues
-  };
+  var first = allData[0].date, last = allData[allData.length - 1].date;
+  var daysOfData = Math.round((last - first) / (1000 * 60 * 60 * 24));
+  var hourlyAvg = new Array(24).fill(0), hourlyCount = new Array(24).fill(0);
+  allData.forEach(function(d) { var h = d.date.getHours(); hourlyAvg[h] += d.sgv; hourlyCount[h]++; });
+  var hourlyValues = hourlyAvg.map(function(sum, i) { return hourlyCount[i] > 0 ? sum / hourlyCount[i] : null; });
+  analysisResults = { mean: mean, stdDev: stdDev, cv: cv, gmi: gmi, total: total, tirPct: { low: ((veryLow + low) / total * 100).toFixed(1), inRange: (inRange / total * 100).toFixed(1), high: ((high + veryHigh) / total * 100).toFixed(1) }, nightHypos: nightHypos, hyper: hyper, hypo: hypo, rapidRise: rapidRise, rapidFall: rapidFall, latest: allData[allData.length - 1], firstDate: first, lastDate: last, daysOfData: daysOfData, hourlyValues: hourlyValues };
 }
 
-// ============================================================
-// UI UPDATES
-// ============================================================
 function updateDashboard() {
-  const r = analysisResults;
-  
-  const glucoseEl = document.getElementById('liveGlucose');
+  var r = analysisResults;
+  var glucoseEl = document.getElementById("liveGlucose");
   glucoseEl.textContent = r.latest.sgv.toFixed(1);
-  glucoseEl.style.color = r.latest.sgv < THRESHOLDS.low ? 'var(--color-error)' : r.latest.sgv > THRESHOLDS.high ? 'var(--color-warning)' : 'var(--color-success)';
-  
-  document.getElementById('tirInRange').textContent = r.tirPct.inRange + '%';
-  document.getElementById('tirHigh').textContent = r.tirPct.high + '%';
-  document.getElementById('tirLow').textContent = r.tirPct.low + '%';
-  
-  document.getElementById('gmi').textContent = r.gmi.toFixed(1) + '%';
-  document.getElementById('gmi').className = 'kpi-value ' + (r.gmi < 7 ? 'good' : 'warn');
-  
-  document.getElementById('avgGlucose').textContent = r.mean.toFixed(1) + ' mmol/L';
-  document.getElementById('avgGlucose').className = 'kpi-value ' + (r.mean < 3.9 ? 'danger' : r.mean > 10 ? 'warn' : 'good');
-  document.getElementById('stdDevSub').textContent = 'SD: ±' + r.stdDev.toFixed(1);
-  
-  document.getElementById('cv').textContent = r.cv.toFixed(0) + '%';
-  document.getElementById('cv').className = 'kpi-value ' + (r.cv < 36 ? 'good' : 'warn');
-  
-  document.getElementById('nightHypos').textContent = r.nightHypos;
-  document.getElementById('nightHypos').className = 'kpi-value ' + (r.nightHypos === 0 ? 'good' : 'warn');
-  
-  document.getElementById('daysOfData').textContent = r.daysOfData;
-  document.getElementById('totalMeasurements').textContent = r.total;
-  
-  document.getElementById('tirLowBar').style.flex = parseFloat(r.tirPct.low);
-  document.getElementById('tirInRangeBar').style.flex = parseFloat(r.tirPct.inRange);
-  document.getElementById('tirHighBar').style.flex = parseFloat(r.tirPct.high);
-  
-  document.getElementById('lowPct').textContent = r.tirPct.low + '%';
-  document.getElementById('rangePct').textContent = r.tirPct.inRange + '%';
-  document.getElementById('highPct').textContent = r.tirPct.high + '%';
-  
+  glucoseEl.style.color = r.latest.sgv < THRESHOLDS.low ? "var(--error)" : r.latest.sgv > THRESHOLDS.high ? "var(--warning)" : "var(--success)";
+  document.getElementById("tirInRange").textContent = r.tirPct.inRange + "%";
+  document.getElementById("tirHigh").textContent = r.tirPct.high + "%";
+  document.getElementById("tirLow").textContent = r.tirPct.low + "%";
+  document.getElementById("gmi").textContent = r.gmi.toFixed(1) + "%";
+  document.getElementById("gmi").className = "kpi-value " + (r.gmi < 7 ? "good" : "warn");
+  document.getElementById("avgGlucose").textContent = r.mean.toFixed(1) + " mmol/L";
+  document.getElementById("avgGlucose").className = "kpi-value " + (r.mean < 3.9 ? "danger" : r.mean > 10 ? "warn" : "good");
+  document.getElementById("stdDevSub").textContent = "SD: +/-" + r.stdDev.toFixed(1);
+  document.getElementById("cv").textContent = r.cv.toFixed(0) + "%";
+  document.getElementById("cv").className = "kpi-value " + (r.cv < 36 ? "good" : "warn");
+  document.getElementById("nightHypos").textContent = r.nightHypos;
+  document.getElementById("nightHypos").className = "kpi-value " + (r.nightHypos === 0 ? "good" : "warn");
+  document.getElementById("daysOfData").textContent = r.daysOfData;
+  document.getElementById("totalMeasurements").textContent = r.total;
+  document.getElementById("tirLowBar").style.flex = parseFloat(r.tirPct.low);
+  document.getElementById("tirInRangeBar").style.flex = parseFloat(r.tirPct.inRange);
+  document.getElementById("tirHighBar").style.flex = parseFloat(r.tirPct.high);
+  document.getElementById("lowPct").textContent = r.tirPct.low + "%";
+  document.getElementById("rangePct").textContent = r.tirPct.inRange + "%";
+  document.getElementById("highPct").textContent = r.tirPct.high + "%";
   updateDailyChart();
 }
 
 function updateDailyChart() {
-  const r = analysisResults;
-  const hours = Array.from({length: 24}, (_, i) => String(i).padStart(2,'0') + ':00');
-  
+  var r = analysisResults;
+  var hours = [];
+  for (var i = 0; i < 24; i++) hours.push((i < 10 ? "0" : "") + i + ":00");
   if (!dailyChart) {
-    const ctx = document.getElementById('dailyChart').getContext('2d');
-    dailyChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: hours,
-        datasets: [
-          { data: r.hourlyValues, borderColor: '#01696f', backgroundColor: '#01696f18', fill: true, tension: 0.4, pointRadius: 2 },
-          { data: Array(24).fill(10), borderColor: '#96421960', borderDash: [4, 4], pointRadius: 0 },
-          { data: Array(24).fill(3.9), borderColor: '#a12c7b60', borderDash: [4, 4], pointRadius: 0 }
-        ]
-      },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 2, max: 15 } } }
-    });
+    var ctx = document.getElementById("dailyChart").getContext("2d");
+    dailyChart = new Chart(ctx, { type: "line", data: { labels: hours, datasets: [{ data: r.hourlyValues, borderColor: "#01696f", backgroundColor: "#01696f18", fill: true, tension: 0.4, pointRadius: 2 }, { data: new Array(24).fill(10), borderColor: "#96421960", borderDash: [4, 4], pointRadius: 0 }, { data: new Array(24).fill(3.9), borderColor: "#a12c7b60", borderDash: [4, 4], pointRadius: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 2, max: 15 } } } });
   } else {
     dailyChart.data.datasets[0].data = r.hourlyValues;
     dailyChart.update();
@@ -624,35 +359,21 @@ function updateDailyChart() {
 }
 
 function updateTrends() {
-  const r = analysisResults;
-  
-  const dailyData = {};
-  allData.forEach(d => {
-    const day = d.date.toISOString().split('T')[0];
+  var r = analysisResults;
+  var dailyData = {};
+  allData.forEach(function(d) {
+    var day = d.date.toISOString().split("T")[0];
     if (!dailyData[day]) dailyData[day] = [];
     dailyData[day].push(d.sgv);
   });
-  
-  const days = Object.keys(dailyData).sort();
-  const dayLabels = days.map(d => new Date(d).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' }));
-  const dayAvgs = days.map(d => dailyData[d].reduce((a, b) => a + b, 0) / dailyData[d].length);
-  const dayMins = days.map(d => Math.min(...dailyData[d]));
-  const dayMaxs = days.map(d => Math.max(...dailyData[d]));
-  
+  var days = Object.keys(dailyData).sort();
+  var dayLabels = days.map(function(d) { return new Date(d).toLocaleDateString("nl-NL", { day: "numeric", month: "short" }); });
+  var dayAvgs = days.map(function(d) { return dailyData[d].reduce(function(a, b) { return a + b; }, 0) / dailyData[d].length; });
+  var dayMins = days.map(function(d) { return Math.min.apply(null, dailyData[d]); });
+  var dayMaxs = days.map(function(d) { return Math.max.apply(null, dailyData[d]); });
   if (!monthlyChart) {
-    const ctx = document.getElementById('monthlyChart').getContext('2d');
-    monthlyChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: dayLabels,
-        datasets: [
-          { label: 'Gemiddeld', data: dayAvgs, borderColor: '#01696f', backgroundColor: '#01696f20', fill: true, tension: 0.3, pointRadius: 0 },
-          { label: 'Max', data: dayMaxs, borderColor: '#96421960', borderDash: [3, 3], pointRadius: 0 },
-          { label: 'Min', data: dayMins, borderColor: '#a12c7b60', borderDash: [3, 3], pointRadius: 0 }
-        ]
-      },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { y: { min: 2, max: 15 } } }
-    });
+    var ctx = document.getElementById("monthlyChart").getContext("2d");
+    monthlyChart = new Chart(ctx, { type: "line", data: { labels: dayLabels, datasets: [{ label: "Gemiddeld", data: dayAvgs, borderColor: "#01696f", backgroundColor: "#01696f20", fill: true, tension: 0.3, pointRadius: 0 }, { label: "Max", data: dayMaxs, borderColor: "#96421960", borderDash: [3, 3], pointRadius: 0 }, { label: "Min", data: dayMins, borderColor: "#a12c7b60", borderDash: [3, 3], pointRadius: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom" } }, scales: { y: { min: 2, max: 15 } } } });
   } else {
     monthlyChart.data.labels = dayLabels;
     monthlyChart.data.datasets[0].data = dayAvgs;
@@ -660,38 +381,27 @@ function updateTrends() {
     monthlyChart.data.datasets[2].data = dayMins;
     monthlyChart.update();
   }
-  
-  const weeks = Math.ceil(r.daysOfData / 7);
-  const weekLabels = [], weekTir = [];
-  for (let w = 0; w < weeks; w++) {
-    const weekStart = new Date(r.firstDate.getTime() + w * 7 * 24 * 60 * 60 * 1000);
-    const weekEnd = new Date(weekStart.getTime() + 7 * 24 * 60 * 60 * 1000);
-    const weekData = allData.filter(d => d.date >= weekStart && d.date < weekEnd);
-    const inRange = weekData.filter(d => d.sgv >= THRESHOLDS.low && d.sgv <= THRESHOLDS.high).length;
-    weekLabels.push('W' + (w + 1));
+  var weeks = Math.ceil(r.daysOfData / 7);
+  var weekLabels = [], weekTir = [];
+  for (var w = 0; w < weeks; w++) {
+    var weekStart = new Date(r.firstDate.getTime() + w * 7 * 24 * 60 * 60 * 1000);
+    var weekEnd = new Date(weekStart.getTime() + 7 * 24 * 60 * 60 * 1000);
+    var weekData = allData.filter(function(d) { return d.date >= weekStart && d.date < weekEnd; });
+    var inRange = weekData.filter(function(d) { return d.sgv >= THRESHOLDS.low && d.sgv <= THRESHOLDS.high; }).length;
+    weekLabels.push("W" + (w + 1));
     weekTir.push(weekData.length ? (inRange / weekData.length * 100).toFixed(0) : 0);
   }
-  
   if (!weeklyChart) {
-    const ctx = document.getElementById('weeklyChart').getContext('2d');
-    weeklyChart = new Chart(ctx, {
-      type: 'bar',
-      data: { labels: weekLabels, datasets: [{ data: weekTir, backgroundColor: weekTir.map(v => v >= 70 ? '#437a22' : v >= 50 ? '#964219' : '#dc262680') }] },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 0, max: 100 } } }
-    });
+    var ctx2 = document.getElementById("weeklyChart").getContext("2d");
+    weeklyChart = new Chart(ctx2, { type: "bar", data: { labels: weekLabels, datasets: [{ data: weekTir, backgroundColor: weekTir.map(function(v) { return v >= 70 ? "#437a22" : v >= 50 ? "#964219" : "#dc262680"; }) }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 0, max: 100 } } } });
   } else {
     weeklyChart.data.labels = weekLabels;
     weeklyChart.data.datasets[0].data = weekTir;
     weeklyChart.update();
   }
-  
   if (!dailyAvgChart) {
-    const ctx = document.getElementById('dailyAvgChart').getContext('2d');
-    dailyAvgChart = new Chart(ctx, {
-      type: 'bar',
-      data: { labels: dayLabels.slice(-14), datasets: [{ data: dayAvgs.slice(-14), backgroundColor: dayAvgs.slice(-14).map(v => v < 3.9 ? '#dc2626' : v > 10 ? '#964219' : '#437a2280') }] },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 4, max: 12 } } }
-    });
+    var ctx3 = document.getElementById("dailyAvgChart").getContext("2d");
+    dailyAvgChart = new Chart(ctx3, { type: "bar", data: { labels: dayLabels.slice(-14), datasets: [{ data: dayAvgs.slice(-14), backgroundColor: dayAvgs.slice(-14).map(function(v) { return v < 3.9 ? "#dc2626" : v > 10 ? "#964219" : "#437a2280"; }) }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 4, max: 12 } } } });
   } else {
     dailyAvgChart.data.labels = dayLabels.slice(-14);
     dailyAvgChart.data.datasets[0].data = dayAvgs.slice(-14);
@@ -700,70 +410,39 @@ function updateTrends() {
 }
 
 function updateUitschieters() {
-  const r = analysisResults;
-  
-  document.getElementById('hyperCount').textContent = r.hyper;
-  document.getElementById('hypoCount').textContent = r.hypo;
-  document.getElementById('rapidRiseCount').textContent = r.rapidRise;
-  document.getElementById('rapidFallCount').textContent = r.rapidFall;
-  
-  const recs = [];
-  if (r.hyper > 5) recs.push({ icon: '📈', text: '<strong>Veel hoge waarden (' + r.hyper + ')</strong> - Pre-bolus 15-20 min voor maaltijden. Check ISF.', priority: 'high' });
-  if (r.hypo > 0) recs.push({ icon: '⚡', text: '<strong>' + r.hypo + ' lage waarden (&lt;3.0)</strong> - Overweeg lagere basaal of snack voor slapen.', priority: 'high' });
-  if (r.nightHypos > 0) recs.push({ icon: '🌙', text: '<strong>' + r.nightHypos + ' nachtelijke hypo\'s</strong> - Verlaging nachtbasaal (00:00-04:00).', priority: 'high' });
-  if (r.rapidRise > 10) recs.push({ icon: '🚀', text: '<strong>' + r.rapidRise + ' snelle stijgers</strong> - Vermijd snelle koolhydraten.', priority: 'med' });
-  if (r.rapidFall > 10) recs.push({ icon: '💨', text: '<strong>' + r.rapidFall + ' snelle dalingen</strong> - Check basaal instellingen.', priority: 'med' });
-  if (recs.length === 0) recs.push({ icon: '✅', text: '<strong>Goed bezig!</strong> Geen significante uitschieters.', priority: 'low' });
-  
-  document.getElementById('spikeRecs').innerHTML = recs.map(r => 
-    '<div class="rec-item ' + r.priority + '"><div class="rec-icon">' + r.icon + '</div><div class="rec-text">' + r.text + '</div><div class="rec-priority ' + r.priority + '">' + (r.priority === 'high' ? 'Prioriteit' : r.priority === 'med' ? 'Advies' : 'Info') + '</div></div>'
-  ).join('');
+  var r = analysisResults;
+  document.getElementById("hyperCount").textContent = r.hyper;
+  document.getElementById("hypoCount").textContent = r.hypo;
+  document.getElementById("rapidRiseCount").textContent = r.rapidRise;
+  document.getElementById("rapidFallCount").textContent = r.rapidFall;
+  var recs = [];
+  if (r.hyper > 5) recs.push({ icon: "1", text: "<strong>Veel hoge waarden (" + r.hyper + ")</strong> - Pre-bolus 15-20 min voor maaltijden. Check ISF.", priority: "high" });
+  if (r.hypo > 0) recs.push({ icon: "2", text: "<strong>" + r.hypo + " lage waarden (onder 3.0)</strong> - Overweeg lagere basaal of snack voor slapen.", priority: "high" });
+  if (r.nightHypos > 0) recs.push({ icon: "3", text: "<strong>" + r.nightHypos + " nachtelijke hypo's</strong> - Verlaging nachtbasaal (00:00-04:00).", priority: "high" });
+  if (r.rapidRise > 10) recs.push({ icon: "4", text: "<strong>" + r.rapidRise + " snelle stijgers</strong> - Vermijd snelle koolhydraten.", priority: "med" });
+  if (r.rapidFall > 10) recs.push({ icon: "5", text: "<strong>" + r.rapidFall + " snelle dalingen</strong> - Check basaal instellingen.", priority: "med" });
+  if (recs.length === 0) recs.push({ icon: "V", text: "<strong>Goed bezig!</strong> Geen significante uitschieters.", priority: "low" });
+  document.getElementById("spikeRecs").innerHTML = recs.map(function(r) { return "<div class=\"rec-item " + r.priority + "\"><div class=\"rec-icon\">" + r.icon + "</div><div class=\"rec-text\">" + r.text + "</div><div class=\"rec-priority " + r.priority + "\">" + (r.priority === "high" ? "Prioriteit" : r.priority === "med" ? "Advies" : "Info") + "</div></div>"; }).join("");
 }
 
 function updateAdvies() {
-  const r = analysisResults;
-  const recs = [];
-  
-  if (parseFloat(r.tirPct.inRange) >= 70) recs.push({ icon: '🏆', text: '<strong>TIR van ' + r.tirPct.inRange + '%</strong> - Uitstekend! Blijf dit volhouden.', priority: 'low' });
-  else if (parseFloat(r.tirPct.inRange) >= 50) recs.push({ icon: '📊', text: '<strong>TIR van ' + r.tirPct.inRange + '%</strong> - Stap richting 70% met pre-bolus.', priority: 'med' });
-  else recs.push({ icon: '📈', text: '<strong>TIR van ' + r.tirPct.inRange + '%</strong> - Focus op stabilisatie.', priority: 'high' });
-  
-  if (r.cv > 36) recs.push({ icon: '📉', text: '<strong>CV van ' + r.cv.toFixed(0) + '%</strong> - Focus op regelmatige eettijden.', priority: 'med' });
-  if (r.nightHypos > 0) recs.push({ icon: '🌙', text: '<strong>' + r.nightHypos + ' nachtelijke hypo\'s</strong> - Lagere basaal 00:00-04:00 of snack voor slapen.', priority: 'high' });
-  
-  if (recs.length === 0) recs.push({ icon: '✅', text: '<strong>Alles ziet er goed uit!</strong>', priority: 'low' });
-  
-  document.getElementById('adviesList').innerHTML = recs.map(r => 
-    '<div class="rec-item ' + r.priority + '"><div class="rec-icon">' + r.icon + '</div><div class="rec-text">' + r.text + '</div><div class="rec-priority ' + r.priority + '">' + (r.priority === 'high' ? 'Prioriteit' : r.priority === 'med' ? 'Advies' : 'Info') + '</div></div>'
-  ).join('');
+  var r = analysisResults;
+  var recs = [];
+  if (parseFloat(r.tirPct.inRange) >= 70) recs.push({ icon: "O", text: "<strong>TIR van " + r.tirPct.inRange + "%</strong> - Uitstekend! Blijf dit volhouden.", priority: "low" });
+  else if (parseFloat(r.tirPct.inRange) >= 50) recs.push({ icon: "S", text: "<strong>TIR van " + r.tirPct.inRange + "%</strong> - Stap richting 70% met pre-bolus.", priority: "med" });
+  else recs.push({ icon: "V", text: "<strong>TIR van " + r.tirPct.inRange + "%</strong> - Focus op stabilisatie.", priority: "high" });
+  if (r.cv > 36) recs.push({ icon: "X", text: "<strong>CV van " + r.cv.toFixed(0) + "%</strong> - Focus op regelmatige eettijden.", priority: "med" });
+  if (r.nightHypos > 0) recs.push({ icon: "N", text: "<strong>" + r.nightHypos + " nachtelijke hypo's</strong> - Lagere basaal 00:00-04:00 of snack voor slapen.", priority: "high" });
+  if (recs.length === 0) recs.push({ icon: "O", text: "<strong>Alles ziet er goed uit!</strong>", priority: "low" });
+  document.getElementById("adviesList").innerHTML = recs.map(function(r) { return "<div class=\"rec-item " + r.priority + "\"><div class=\"rec-icon\">" + r.icon + "</div><div class=\"rec-text\">" + r.text + "</div><div class=\"rec-priority " + r.priority + "\">" + (r.priority === "high" ? "Prioriteit" : r.priority === "med" ? "Advies" : "Info") + "</div></div>"; }).join("");
 }
 
-// ============================================================
-// HULPFUNCTIONS
-// ============================================================
-function toggleTheme() {
-  const cur = document.documentElement.getAttribute('data-theme');
-  document.documentElement.setAttribute('data-theme', cur === 'dark' ? 'light' : 'dark');
-}
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('sidebarOverlay').classList.toggle('open');
-}
-const titles = { dashboard: 'Overzicht', trends: 'Trends', uitschieters: 'Uitschieters', advies: 'Advies' };
-function switchView(viewId, el) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('view-' + viewId).classList.add('active');
-  if (el) el.classList.add('active');
-  document.getElementById('pageTitle').textContent = titles[viewId];
-}
+function toggleTheme() { var cur = document.documentElement.getAttribute("data-theme"); document.documentElement.setAttribute("data-theme", cur === "dark" ? "light" : "dark"); }
+function toggleSidebar() { document.getElementById("sidebar").classList.toggle("open"); document.getElementById("sidebarOverlay").classList.toggle("open"); }
+var titles = { dashboard: "Overzicht", trends: "Trends", uitschieters: "Uitschieters", advies: "Advies" };
+function switchView(viewId, el) { document.querySelectorAll(".view").forEach(function(v) { v.classList.remove("active"); }); document.querySelectorAll(".nav-item").forEach(function(n) { n.classList.remove("active"); }); document.getElementById("view-" + viewId).classList.add("active"); if (el) el.classList.add("active"); document.getElementById("pageTitle").textContent = titles[viewId]; }
 
-// Init
-window.addEventListener('DOMContentLoaded', () => {
-  const uploadZone = document.getElementById('uploadZone');
-  uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
-  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
-  uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.classList.remove('dragover'); if (e.dataTransfer.files[0]) handleCSVFile(e.dataTransfer.files[0]); });
+window.addEventListener("DOMContentLoaded", function() {
   refreshData();
 });
 </script>
