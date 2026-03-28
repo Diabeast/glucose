@@ -293,20 +293,26 @@ const THRESHOLDS = { veryLow: 3.0, low: 3.9, high: 10.0, veryHigh: 13.9 };
 // API FUNCTIONS
 // ============================================================
 async function fetchNightscout(endpoint) {
+  const baseUrl = CONFIG.nightscoutUrl + 'api/v1/' + endpoint + '&token=' + CONFIG.token;
+  
   try {
-    const url = CONFIG.nightscoutUrl + 'api/v1/' + endpoint + '&token=' + CONFIG.token;
-    const res = await fetch(url, { headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' } });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const text = await res.text();
-    try { return JSON.parse(text); }
-    catch {
-      const lines = text.trim().split('\n');
-      return lines.map(line => {
-        const parts = line.split('\t');
-        return { date: parts[0], dateString: parts[0], sgv: parseInt(parts[2]), direction: parts[3]?.replace(/"/g, '') || '' };
-      });
+    const res = await fetch(baseUrl, { 
+      headers: { 'Accept': 'application/json' }
+    });
+    if (res.ok) {
+      const text = await res.text();
+      try { return JSON.parse(text); }
+      catch {
+        const lines = text.trim().split('\n');
+        return lines.map(line => {
+          const parts = line.split('\t');
+          return { date: parts[0], dateString: parts[0], sgv: parseInt(parts[2]), direction: parts[3]?.replace(/"/g, '') || '' };
+        });
+      }
     }
-  } catch(e) { console.error('Fetch failed:', e); return null; }
+  } catch(e) { console.log('Fetch error:', e.message); }
+  
+  return null;
 }
 
 // ============================================================
