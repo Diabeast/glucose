@@ -108,6 +108,9 @@ body{font-family:Inter,sans-serif;min-height:100vh;background:#f7f6f2;color:#282
 .time-filters button{padding:8px 16px;border:1px solid #d4d1ca;border-radius:8px;background:#f9f8f5;cursor:pointer;font-size:13px}
 .time-filters button.active{background:#01696f;color:#fff;border-color:#01696f}
 .last-updated{font-size:11px;color:#7a7974;margin-top:5px}
+.status-inline{padding:4px 12px;border-radius:12px;font-size:11px;font-weight:500;display:inline-block;margin-bottom:5px}
+.status-inline.live{background:#d4dfcc;color:#437a22}
+.status-inline.error{background:#e0ced7;color:#a12c7b}
 .page-title{display:none;text-align:center;font-size:24px;font-weight:700;margin-bottom:25px}
 
 /* Mobile Responsive */
@@ -187,6 +190,7 @@ body{font-family:Inter,sans-serif;min-height:100vh;background:#f7f6f2;color:#282
   <div id="view-overzicht">
     <div class="glucose">
       <div>
+        <div class="status-inline" id="statusBadge">Laden...</div>
         <div class="glucose-nr green" id="glucose">--</div>
         <div class="glucose-unit">mmol/L</div>
         <div class="last-updated" id="lastUpdated"></div>
@@ -387,13 +391,13 @@ function fetchAPI(ep) {
 
 function init() {
   document.getElementById("statusBadge").textContent = "Laden...";
-  document.getElementById("statusBadge").className = "status live";
+  document.getElementById("statusBadge").className = "status-inline live";
   
   var count = MAX_DAYS * 288;
   fetchAPI("entries?count=" + count).then(function(entries) {
     if (!entries || entries.length === 0) {
       document.getElementById("statusBadge").textContent = "Geen data";
-      document.getElementById("statusBadge").className = "status error";
+      document.getElementById("statusBadge").className = "status-inline error";
       return;
     }
     
@@ -403,7 +407,7 @@ function init() {
     
     if (data.length === 0) {
       document.getElementById("statusBadge").textContent = "Geen data";
-      document.getElementById("statusBadge").className = "status error";
+      document.getElementById("statusBadge").className = "status-inline error";
       return;
     }
     
@@ -442,7 +446,7 @@ function analyze() {
   
   if (vals.length === 0 || data.length === 0) {
     document.getElementById("statusBadge").textContent = "Geen data";
-    document.getElementById("statusBadge").className = "status error";
+    document.getElementById("statusBadge").className = "status-inline error";
     return;
   }
   
