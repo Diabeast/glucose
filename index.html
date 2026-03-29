@@ -31,7 +31,7 @@ body{font-family:Inter,sans-serif;min-height:100vh;background:#f7f6f2;color:#282
 .glucose{display:flex;align-items:center;gap:30px;background:#f9f8f5;padding:25px;border-radius:15px;margin-bottom:25px;flex-wrap:wrap}
 .glucose-nr{font-size:56px;font-weight:700;font-family:JetBrains Mono,monospace}
 .glucose-nr.red{color:#dc2626}
-.glucose-nr.orange{color:#964219}
+.glucose-nr.orange{color:#2563eb}
 .glucose-nr.green{color:#437a22}
 .glucose-unit{font-size:14px;color:#7a7974}
 .glucose-meta{display:flex;gap:20px;flex-wrap:wrap}
@@ -46,7 +46,7 @@ body{font-family:Inter,sans-serif;min-height:100vh;background:#f7f6f2;color:#282
 .card-label{font-size:11px;color:#7a7974;text-transform:uppercase;letter-spacing:0.5px}
 .card-val{font-size:24px;font-weight:700;font-family:JetBrains Mono,monospace;margin:5px 0}
 .card-val.good{color:#437a22}
-.card-val.warn{color:#964219}
+.card-val.warn{color:#2563eb}
 .card-val.danger{color:#dc2626}
 .card-sub{font-size:11px;color:#7a7974}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
@@ -138,7 +138,7 @@ body{font-family:Inter,sans-serif;min-height:100vh;background:#f7f6f2;color:#282
 <div class="main">
   <div class="mobile-header">
     <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
-    <h2 id="pageTitle">Overzicht</h2>
+    <h2 id="pageTitle">GlucoDash</h2>
   </div>
   <div class="top">
     <div class="mobile-controls">
@@ -168,12 +168,12 @@ body{font-family:Inter,sans-serif;min-height:100vh;background:#f7f6f2;color:#282
       <div class="tir-bar">
         <div class="tir-seg" id="tirLowBar" style="background:#dc2626;flex:0"></div>
         <div class="tir-seg" id="tirInBar" style="background:#437a22;flex:1"></div>
-        <div class="tir-seg" id="tirHighBar" style="background:#964219;flex:0"></div>
+        <div class="tir-seg" id="tirHighBar" style="background:#2563eb;flex:0"></div>
       </div>
       <div style="display:flex;justify-content:space-between;margin-top:10px;font-size:13px">
         <span style="color:#dc2626">Laag (&lt;3.9): <strong id="lowPct">0%</strong></span>
         <span style="color:#437a22">In doel: <strong id="inPct">100%</strong></span>
-        <span style="color:#964219">Hoog (&gt;10): <strong id="highPct">0%</strong></span>
+        <span style="color:#2563eb">Hoog (&gt;10): <strong id="highPct">0%</strong></span>
       </div>
     </div>
 
@@ -345,21 +345,11 @@ function init() {
       .filter(function(e) { return e.sgv && e.date && !isNaN(e.date.getTime()); })
       .sort(function(a, b) { return a.date - b.date; });
     
-    var cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - DAYS);
-    data = data.filter(function(d) { return d.date >= cutoff; });
-    
     if (data.length === 0) {
       document.getElementById("statusBadge").textContent = "Geen data";
       document.getElementById("statusBadge").className = "status error";
       return;
     }
-    
-    var oldest = data[0].date, newest = data[data.length - 1].date;
-    var days = Math.round((newest - oldest) / 86400000) || 1;
-    
-    document.getElementById("statusBadge").textContent = days + " dagen data";
-    document.getElementById("lastUpdated").textContent = "Laatste meting: " + newest.toLocaleTimeString("nl-NL", {hour:"2-digit", minute:"2-digit"});
     
     analyze();
     update();
@@ -368,20 +358,6 @@ function init() {
 
 function changePeriod() {
   DAYS = parseInt(document.getElementById("periodSelect").value);
-  var cutoff = new Date();
-  cutoff.setDate(cutoff.getDate() - DAYS);
-  var filteredData = data.filter(function(d) { return d.date >= cutoff; });
-  
-  if (filteredData.length === 0) {
-    document.getElementById("statusBadge").textContent = "Geen data";
-    document.getElementById("statusBadge").className = "status error";
-    return;
-  }
-  
-  var oldest = filteredData[0].date, newest = filteredData[filteredData.length - 1].date;
-  var days = Math.round((newest - oldest) / 86400000) || 1;
-  document.getElementById("statusBadge").textContent = days + " dagen data";
-  
   analyze();
   update();
 }
@@ -405,7 +381,16 @@ function analyze() {
   var periodData = data.filter(function(d) { return d.date >= cutoff; });
   var vals = periodData.map(function(d) { return d.sgv; });
   
-  if (vals.length === 0) return;
+  if (vals.length === 0 || data.length === 0) {
+    document.getElementById("statusBadge").textContent = "Geen data";
+    document.getElementById("statusBadge").className = "status error";
+    return;
+  }
+  
+  var oldest = periodData[0].date, newest = periodData[periodData.length - 1].date;
+  var periodDays = Math.round((newest - oldest) / 86400000) || 1;
+  document.getElementById("statusBadge").textContent = periodDays + " dagen data";
+  document.getElementById("lastUpdated").textContent = "Laatste: " + newest.toLocaleTimeString("nl-NL", {hour:"2-digit", minute:"2-digit"});
   
   var mean = vals.reduce(function(a, b) { return a + b; }, 0) / vals.length;
   var variance = vals.reduce(function(a, v) { return a + Math.pow(v - mean, 2); }, 0) / vals.length;
@@ -540,7 +525,7 @@ function updateChart(id, values, max) {
         labels: hours, 
         datasets: [
           { data: values, borderColor: "#01696f", backgroundColor: "#01696f18", fill: true, tension: 0.4, pointRadius: 0 },
-          { data: new Array(max).fill(10), borderColor: "#96421940", borderDash: [4, 4], pointRadius: 0 },
+          { data: new Array(max).fill(10), borderColor: "#2563eb40", borderDash: [4, 4], pointRadius: 0 },
           { data: new Array(max).fill(3.9), borderColor: "#dc262640", borderDash: [4, 4], pointRadius: 0 }
         ]
       },
@@ -582,7 +567,7 @@ function updateTrends() {
           labels: labels, 
           datasets: [
             { label: "Gemiddelde", data: avgs, borderColor: "#01696f", backgroundColor: "#01696f20", fill: true, tension: 0.3, pointRadius: 0 },
-            { label: "Max", data: maxs, borderColor: "#96421960", borderDash: [3, 3], pointRadius: 0 },
+            { label: "Max", data: maxs, borderColor: "#2563eb60", borderDash: [3, 3], pointRadius: 0 },
             { label: "Min", data: mins, borderColor: "#dc262660", borderDash: [3, 3], pointRadius: 0 }
           ]
         },
@@ -612,7 +597,7 @@ function updateTrends() {
     } else {
       charts.weeklyChart = new Chart(ctx2, {
         type: "bar",
-        data: { labels: wLabels, datasets: [{ data: wTir, backgroundColor: wTir.map(function(v) { return v >= 70 ? "#437a22" : v >= 50 ? "#964219" : "#dc262680"; }) }] },
+        data: { labels: wLabels, datasets: [{ data: wTir, backgroundColor: wTir.map(function(v) { return v >= 70 ? "#437a22" : v >= 50 ? "#2563eb" : "#dc262680"; }) }] },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 0, max: 100 } } }
       });
     }
@@ -627,7 +612,7 @@ function updateTrends() {
     } else {
       charts.dailyAvgChart = new Chart(ctx3, {
         type: "bar",
-        data: { labels: labels.slice(-14), datasets: [{ data: avgs.slice(-14), backgroundColor: avgs.slice(-14).map(function(v) { return v < T.low ? "#dc2626" : v > T.high ? "#964219" : "#437a2280"; }) }] },
+        data: { labels: labels.slice(-14), datasets: [{ data: avgs.slice(-14), backgroundColor: avgs.slice(-14).map(function(v) { return v < T.low ? "#dc2626" : v > T.high ? "#2563eb" : "#437a2280"; }) }] },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 4, max: 12 } } }
       });
     }
@@ -717,7 +702,7 @@ function updateUitschieters() {
         data: {
           labels: spikeDays.map(function(d) { return new Date(d).toLocaleDateString("nl-NL", { day: "numeric", month: "short" }); }),
           datasets: [
-            { label: "Hyper", data: spikeDays.map(function(d) { return dailySpikes[d].high; }), backgroundColor: "#96421980" },
+            { label: "Hyper", data: spikeDays.map(function(d) { return dailySpikes[d].high; }), backgroundColor: "#2563eb80" },
             { label: "Hypo", data: spikeDays.map(function(d) { return dailySpikes[d].low; }), backgroundColor: "#dc262680" }
           ]
         },
@@ -830,7 +815,7 @@ function updateMeals() {
         data: {
           labels: mealLabels,
           datasets: [
-            { label: "Max na maaltijd", data: mealMaxes, backgroundColor: "#96421960" },
+            { label: "Max na maaltijd", data: mealMaxes, backgroundColor: "#2563eb60" },
             { label: "Min na maaltijd", data: mealMins, backgroundColor: "#437a2280" }
           ]
         },
@@ -902,7 +887,7 @@ function showView(id) {
   document.querySelectorAll(".nav button").forEach(function(b) { b.classList.remove("active"); });
   event.target.classList.add("active");
   var titles = { 
-    overzicht: "Overzicht", 
+    overzicht: "GlucoDash", 
     trends: "Trends", 
     uitschieters: "Uitschieters Analyse", 
     maaltijden: "Maaltijd Analyse",
