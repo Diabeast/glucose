@@ -88,18 +88,20 @@ body{font-family:Inter,sans-serif;min-height:100vh;background:#f7f6f2;color:#282
   .two-col{grid-template-columns:1fr}
   .sidebar{display:none;position:fixed;top:0;left:0;width:100%;height:100vh;z-index:1000;background:#f9f8f5}
   .sidebar.open{display:block}
-  .main{margin-left:0;padding:15px;padding-top:80px}
+  .main{margin-left:0;padding:15px;padding-top:70px}
   .toggle-info{left:20px;bottom:90px}
-  .menu-toggle{display:flex;align-items:center;justify-content:center;position:fixed;top:15px;left:15px;z-index:1001;width:44px;height:44px;border-radius:10px;border:none;background:#6b6b6b;color:#fff;font-size:20px;cursor:pointer}
+  .mobile-header{display:flex;align-items:center;gap:12px;margin-bottom:15px}
+  .menu-toggle{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:40px;height:40px;border-radius:8px;border:none;background:#e0e0e0;color:#555;font-size:18px;cursor:pointer}
+  .mobile-header h2{font-size:18px;font-weight:600;color:#28251d;margin:0}
   .close-sidebar{display:block;position:absolute;top:15px;right:15px;width:36px;height:36px;border-radius:50%;border:none;background:#d0d0d0;font-size:18px;cursor:pointer}
   .glucose{flex-direction:column;text-align:center;gap:15px;padding:20px}
   .glucose-nr{font-size:48px}
   .glucose-meta{justify-content:center}
-  .top{flex-direction:column;align-items:flex-start;gap:10px}
-  .top h2{font-size:20px;padding-left:60px;width:100%}
+  .top{flex-direction:column;gap:10px}
+  .top h2{display:none}
   .mobile-controls{display:flex;flex-direction:column;gap:10px;width:100%}
   .mobile-controls select{width:100%;padding:12px 15px;border:1px solid #d4d1ca;border-radius:8px;font-size:14px;background:#fff}
-  .mobile-controls .status{text-align:center;padding:10px}
+  .mobile-controls .status{text-align:center;padding:10px;background:#f5f5f5;border-radius:8px}
   .card{padding:15px}
   .card-val{font-size:20px}
   .chart{height:200px}
@@ -116,8 +118,6 @@ body{font-family:Inter,sans-serif;min-height:100vh;background:#f7f6f2;color:#282
 </head>
 <body>
 
-<button class="menu-toggle" onclick="toggleSidebar()">☰</button>
-
 <div class="sidebar" id="sidebar">
   <button class="close-sidebar" onclick="toggleSidebar()">✕</button>
   <h1>GlucoDash</h1>
@@ -133,8 +133,11 @@ body{font-family:Inter,sans-serif;min-height:100vh;background:#f7f6f2;color:#282
 </div>
 
 <div class="main">
-  <div class="top mobile-top">
+  <div class="mobile-header">
+    <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
     <h2 id="pageTitle">Overzicht</h2>
+  </div>
+  <div class="top">
     <div class="mobile-controls">
       <select id="periodSelect" onchange="changePeriod()">
         <option value="14">14 dagen</option>
@@ -163,7 +166,7 @@ body{font-family:Inter,sans-serif;min-height:100vh;background:#f7f6f2;color:#282
     </div>
 
     <div class="grid">
-      <div class="card"><div class="card-label">GMI</div><div class="card-val" id="gmi">--</div><div class="card-sub">Geschat HbA1c</div></div>
+      <div class="card"><div class="card-label">HbA1c</div><div class="card-val" id="gmi">--</div><div class="card-sub">Geschat (mmol/mol)</div></div>
       <div class="card"><div class="card-label">Gemiddelde</div><div class="card-val" id="avg">--</div><div class="card-sub" id="sd">SD: --</div></div>
       <div class="card"><div class="card-label">CV</div><div class="card-val" id="cv">--</div><div class="card-sub">Doel onder 36%</div></div>
       <div class="card"><div class="card-label">Nachtelijke hypo</div><div class="card-val" id="nightHypos">--</div><div class="card-sub">00:00 - 06:00</div></div>
@@ -228,9 +231,11 @@ body{font-family:Inter,sans-serif;min-height:100vh;background:#f7f6f2;color:#282
         <div class="card-sub">&lt;-0.1 mmol/min daling</div>
       </div>
       <div class="card">
-        <div class="card-label">Standaard Deviatie</div>
-        <div class="card-val" id="sdCard">--</div>
-        <div class="card-sub">Variantie</div>
+        <div class="card-label">SD / GMI</div>
+        <div style="display:flex;gap:20px;align-items:baseline">
+          <div><div class="card-val" id="sdCard">--</div><div class="card-sub">SD (mmol/L)</div></div>
+          <div><div class="card-val" id="gmiCard">--</div><div class="card-sub">GMI (%)</div></div>
+        </div>
       </div>
     </div>
   </div>
@@ -407,7 +412,11 @@ function analyze() {
   var variance = vals.reduce(function(a, v) { return a + Math.pow(v - mean, 2); }, 0) / vals.length;
   var std = Math.sqrt(variance);
   var cv = (std / mean) * 100;
-  var gmi = 8.5 + cv * 0.1;
+  // GMI = 3.31 + 0.02392 × mean glucose (mg/dL)
+  // = 3.31 + 0.43 × mean glucose (mmol/L)
+  var gmi = 3.31 + (0.43 * mean);
+  // Convert GMI % to HbA1c mmol/mol
+  var hba1cMmol = Math.round((gmi - 2.15) * 10.929);
   
   var veryLow = vals.filter(function(v) { return v < T.veryLow; }).length;
   var low = vals.filter(function(v) { return v >= T.veryLow && v < T.low; }).length;
@@ -439,7 +448,7 @@ function analyze() {
   var periodDays = Math.round((newest - oldest) / 86400000) || 1;
   
   r = {
-    mean: mean, std: std, cv: cv, gmi: gmi, total: total,
+    mean: mean, std: std, cv: cv, gmi: gmi, hba1cMmol: hba1cMmol, total: total,
     tir: { low: ((veryLow + low) / total * 100).toFixed(1), in: (inRange / total * 100).toFixed(1), high: ((high + veryHigh) / total * 100).toFixed(1) },
     nightHypos: nightHypos, hyperEpisodes: hyperEpisodes, hypoEpisodes: hypoEpisodes, hyperCount: veryHigh, hypoCount: veryLow, rise: rise, fall: fall,
     latest: periodData[periodData.length - 1], oldest: oldest, newest: newest,
@@ -475,8 +484,8 @@ function update() {
   document.getElementById("tirHigh").textContent = r.tir.high + "%";
   document.getElementById("tirLow").textContent = r.tir.low + "%";
   
-  document.getElementById("gmi").textContent = r.gmi.toFixed(1) + "%";
-  document.getElementById("gmi").className = "card-val " + (r.gmi < 7 ? "good" : "warn");
+  document.getElementById("gmi").textContent = r.hba1cMmol;
+  document.getElementById("gmi").className = "card-val " + (r.hba1cMmol < 53 ? "good" : r.hba1cMmol > 64 ? "danger" : "warn");
   
   document.getElementById("avg").textContent = r.mean.toFixed(1) + " mmol/L";
   document.getElementById("avg").className = "card-val " + (r.mean < T.low ? "danger" : r.mean > T.high ? "warn" : "good");
@@ -620,6 +629,7 @@ function updateTrends() {
   document.getElementById("riseCount").textContent = Math.round(r.rise * (DAYS / trendPeriod));
   document.getElementById("fallCount").textContent = Math.round(r.fall * (DAYS / trendPeriod));
   document.getElementById("sdCard").textContent = r.std.toFixed(1);
+  document.getElementById("gmiCard").textContent = r.gmi.toFixed(1) + "%";
 }
 
 function updateUitschieters() {
@@ -860,8 +870,10 @@ function updateAdvies() {
     items.push({ text: "<strong>" + r.fall + " snelle dalingen</strong> - Check basaal instellingen. Overweeg tijdelijke basaalverlaging van 10-20%.", type: "warn" });
   }
   
-  if (r.gmi < 7) {
-    items.push({ text: "<strong>GMI van " + r.gmi.toFixed(1) + "%</strong> - Uitstekend! Geschat HbA1c onder 53 mmol/mol.", type: "success" });
+  if (r.hba1cMmol < 53) {
+    items.push({ text: "<strong>HbA1c van " + r.hba1cMmol + " mmol/mol</strong> - Uitstekend! Dit is onder het streefdoel van 53.", type: "success" });
+  } else if (r.hba1cMmol > 64) {
+    items.push({ text: "<strong>HbA1c van " + r.hba1cMmol + " mmol/mol</strong> - Hoog. Overweeg aanpassingen in je behandeling.", type: "danger" });
   }
   
   if (r.mean >= T.low && r.mean <= T.high) {
