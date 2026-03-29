@@ -143,6 +143,8 @@ body{font-family:Inter,sans-serif;min-height:100vh;background:#f7f6f2;color:#282
   <div class="top">
     <div class="mobile-controls">
       <select id="periodSelect" onchange="changePeriod()">
+        <option value="1">1 dag</option>
+        <option value="7">7 dagen</option>
         <option value="14">14 dagen</option>
         <option value="30" selected>30 dagen</option>
         <option value="60">60 dagen</option>
@@ -178,8 +180,8 @@ body{font-family:Inter,sans-serif;min-height:100vh;background:#f7f6f2;color:#282
     </div>
 
     <div class="grid stats-grid">
-      <div class="card"><div class="card-label">HbA1c</div><div class="card-val" id="gmi">--</div><div class="card-sub">mmol/mol</div></div>
-      <div class="card"><div class="card-label">GMI</div><div class="card-val" id="gmiPct">--</div><div class="card-sub">%</div></div>
+      <div class="card"><div class="card-label">HbA1c</div><div class="card-val" id="gmi">--</div><div class="card-sub">Streef &lt;53</div></div>
+      <div class="card"><div class="card-label">GMI</div><div class="card-val" id="gmiPct">--</div><div class="card-sub">Streef &lt;6.5%</div></div>
       <div class="card"><div class="card-label">Gemiddelde</div><div class="card-val" id="avg">--</div><div class="card-sub" id="sdSub">SD: --</div></div>
       <div class="card"><div class="card-label">SD</div><div class="card-val" id="sdVal">--</div><div class="card-sub">mmol/L</div></div>
       <div class="card"><div class="card-label">CV</div><div class="card-val" id="cv">--</div><div class="card-sub">Doel &lt;36%</div></div>
@@ -232,7 +234,7 @@ body{font-family:Inter,sans-serif;min-height:100vh;background:#f7f6f2;color:#282
       <div class="card">
         <div class="card-label">SD / GMI</div>
         <div style="display:flex;gap:20px;align-items:baseline">
-          <div><div class="card-val" id="sdCard">--</div><div class="card-sub">SD (mmol/L)</div></div>
+          <div><div class="card-val" id="sdCard">--</div><div class="card-sub">Streef &lt;2.2</div></div>
           <div><div class="card-val" id="gmiCard">--</div><div class="card-sub">GMI (%)</div></div>
         </div>
       </div>
