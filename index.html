@@ -27,9 +27,15 @@ body{font-family:Inter,sans-serif;min-height:100vh;background:#f7f6f2;color:#282
 .historie-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:15px}
 .historie-header h3{font-size:20px;font-weight:600;margin:0}
 .historie-header select{padding:8px 12px;border:1px solid #d4d1ca;border-radius:8px;font-size:14px;background:#f9f8f5}
+.home-period{margin-bottom:15px}
+.home-period select{padding:8px 15px;border:1px solid #d4d1ca;border-radius:8px;font-size:14px;background:#f9f8f5;width:100%}
 @media(max-width:600px){
   .historie-header{flex-direction:column;align-items:stretch}
   .historie-header h3{text-align:center;margin-bottom:10px}
+  .home-period select, .historie-header select, #trendSelect, #historieSelect{
+    width:100%;padding:14px;font-size:16px;background:#fff;border:2px solid #d4d1ca;border-radius:10px;margin-bottom:5px
+  }
+  .home-period{margin-bottom:15px}
 }
 .main{margin-left:220px;padding:30px;max-width:1600px}
 .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;flex-wrap:wrap;gap:10px}
@@ -111,6 +117,19 @@ body{font-family:Inter,sans-serif;min-height:100vh;background:#f7f6f2;color:#282
 .status-inline{padding:4px 12px;border-radius:12px;font-size:11px;font-weight:500;display:inline-block;margin-bottom:5px}
 .status-inline.live{background:#d4dfcc;color:#437a22}
 .status-inline.error{background:#e0ced7;color:#a12c7b}
+
+/* Popup Modal */
+.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:2000;justify-content:center;align-items:center;padding:20px;box-sizing:border-box}
+.modal-overlay.show{display:flex}
+.modal-content{background:#f9f8f5;padding:25px;border-radius:15px;max-width:400px;width:100%;max-height:80vh;overflow-y:auto;position:relative}
+.modal-close{position:absolute;top:10px;right:15px;background:none;border:none;font-size:24px;cursor:pointer;color:#7a7974}
+.modal-title{font-size:18px;font-weight:600;margin-bottom:10px;color:#01696f}
+.modal-text{font-size:14px;line-height:1.6;color:#555}
+.card-val{cursor:pointer;-webkit-tap-highlight-color:transparent;min-height:40px;display:flex;align-items:center;justify-content:center}
+.card-val:hover{opacity:0.8}
+.card-val:active{background:rgba(0,0,0,0.05);border-radius:8px}
+.info-icon{cursor:pointer;font-size:12px;margin-left:5px;color:#01696f}
+.info-icon:hover{opacity:0.7}
 .page-title{display:none;text-align:center;font-size:24px;font-weight:700;margin-bottom:25px}
 
 /* Mobile Responsive */
@@ -154,7 +173,7 @@ body{font-family:Inter,sans-serif;min-height:100vh;background:#f7f6f2;color:#282
 
 <div class="sidebar" id="sidebar">
   <button class="close-sidebar" onclick="toggleSidebar()">✕</button>
-  <h1 onclick="showView('overzicht')" style="cursor:pointer">GlucoDash</h1>
+  <h1>GlucoDash</h1>
   <span>Arinelis - iAPS</span>
   <div class="nav">
     <button class="active" onclick="showView('overzicht')">Vandaag</button>
@@ -176,21 +195,29 @@ body{font-family:Inter,sans-serif;min-height:100vh;background:#f7f6f2;color:#282
       <option value="180">180 dagen</option>
     </select>
   </div>
+  <span class="status live" id="statusBadge">Laden...</span>
   <button class="toggle" onclick="toggleTheme()">🌙 Dark mode</button>
 </div>
 
 <div class="main">
   <div class="mobile-header">
     <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
-    <h2 id="pageTitle" onclick="showView('overzicht')" style="cursor:pointer">Vandaag</h2>
+    <h2 id="pageTitle">Vandaag</h2>
   </div>
-  <div class="page-title" id="desktopTitle" onclick="showView('overzicht')" style="cursor:pointer">GlucoDash</div>
+  <div class="page-title" id="desktopTitle">GlucoDash</div>
 
   <!-- OVERZICHT -->
   <div id="view-overzicht">
+    <div class="home-period">
+      <select id="homePeriodSelect" onchange="changeHomePeriod()">
+        <option value="1">Vandaag</option>
+        <option value="7">7 dagen</option>
+        <option value="14">14 dagen</option>
+        <option value="30">30 dagen</option>
+      </select>
+    </div>
     <div class="glucose">
       <div>
-        <div class="status-inline" id="statusBadge">Laden...</div>
         <div class="glucose-nr green" id="glucose">--</div>
         <div class="glucose-unit">mmol/L</div>
         <div class="last-updated" id="lastUpdated"></div>
@@ -212,11 +239,11 @@ body{font-family:Inter,sans-serif;min-height:100vh;background:#f7f6f2;color:#282
     </div>
 
     <div class="grid stats-grid">
-      <div class="card"><div class="card-label">HbA1c</div><div class="card-val" id="gmi">--</div><div class="card-sub">Streef &lt;53</div></div>
-      <div class="card"><div class="card-label">GMI</div><div class="card-val" id="gmiPct">--</div><div class="card-sub">Streef &lt;6.5%</div></div>
-      <div class="card"><div class="card-label">Gemiddelde</div><div class="card-val" id="avg">--</div><div class="card-sub" id="sdSub">SD: --</div></div>
-      <div class="card"><div class="card-label">SD</div><div class="card-val" id="sdVal">--</div><div class="card-sub">mmol/L</div></div>
-      <div class="card"><div class="card-label">CV</div><div class="card-val" id="cv">--</div><div class="card-sub">Doel &lt;36%</div></div>
+      <div class="card"><div class="card-label">HbA1c</div><div class="card-val" id="gmi" onclick="showInfo('gmi')">--</div><div class="card-sub">Streef &lt;53</div></div>
+      <div class="card"><div class="card-label">GMI <span class="info-icon" onclick="showInfo('gmiPct')">ℹ️</span></div><div class="card-val" id="gmiPct" onclick="showInfo('gmiPct')">--</div><div class="card-sub">Streef &lt;6.5%</div></div>
+      <div class="card"><div class="card-label">Gemiddelde</div><div class="card-val" id="avg" onclick="showInfo('avg')">--</div><div class="card-sub" id="sdSub">SD: --</div></div>
+      <div class="card"><div class="card-label">SD <span class="info-icon" onclick="showInfo('sdVal')">ℹ️</span></div><div class="card-val" id="sdVal" onclick="showInfo('sdVal')">--</div><div class="card-sub">mmol/L</div></div>
+      <div class="card"><div class="card-label">CV <span class="info-icon" onclick="showInfo('cv')">ℹ️</span></div><div class="card-val" id="cv" onclick="showInfo('cv')">--</div><div class="card-sub">Doel &lt;36%</div></div>
       <div class="card"><div class="card-label">Nacht hypo</div><div class="card-val" id="nightHypos">--</div><div class="card-sub">00-06u</div></div>
       <div class="card"><div class="card-label">Hyper (&gt;13.9)</div><div class="card-val warn" id="hyperCount">--</div><div class="card-sub">Episodes</div></div>
       <div class="card"><div class="card-label">Hypo (&lt;3.0)</div><div class="card-val danger" id="hypoCount">--</div><div class="card-sub">Episodes</div></div>
@@ -243,11 +270,11 @@ body{font-family:Inter,sans-serif;min-height:100vh;background:#f7f6f2;color:#282
       </select>
     </div>
     <div class="stats-grid" style="margin-top:15px">
-      <div class="card"><div class="card-label">HbA1c</div><div class="card-val" id="histGmi">--</div><div class="card-sub">Streef &lt;53</div></div>
-      <div class="card"><div class="card-label">GMI</div><div class="card-val" id="histGmiPct">--</div><div class="card-sub">Streef &lt;6.5%</div></div>
-      <div class="card"><div class="card-label">Gemiddelde</div><div class="card-val" id="histAvg">--</div><div class="card-sub">mmol/L</div></div>
-      <div class="card"><div class="card-label">SD</div><div class="card-val" id="histSd">--</div><div class="card-sub">Streef &lt;2.2</div></div>
-      <div class="card"><div class="card-label">CV</div><div class="card-val" id="histCv">--</div><div class="card-sub">Streef &lt;36%</div></div>
+      <div class="card"><div class="card-label">HbA1c</div><div class="card-val" id="histGmi" onclick="showInfo('gmi')">--</div><div class="card-sub">Streef &lt;53</div></div>
+      <div class="card"><div class="card-label">GMI <span class="info-icon" onclick="showInfo('gmiPct')">ℹ️</span></div><div class="card-val" id="histGmiPct" onclick="showInfo('gmiPct')">--</div><div class="card-sub">Streef &lt;6.5%</div></div>
+      <div class="card"><div class="card-label">Gemiddelde</div><div class="card-val" id="histAvg" onclick="showInfo('avg')">--</div><div class="card-sub">mmol/L</div></div>
+      <div class="card"><div class="card-label">SD <span class="info-icon" onclick="showInfo('sdVal')">ℹ️</span></div><div class="card-val" id="histSd" onclick="showInfo('sdVal')">--</div><div class="card-sub">Streef &lt;2.2</div></div>
+      <div class="card"><div class="card-label">CV <span class="info-icon" onclick="showInfo('cv')">ℹ️</span></div><div class="card-val" id="histCv" onclick="showInfo('cv')">--</div><div class="card-sub">Streef &lt;36%</div></div>
       <div class="card"><div class="card-label">Nacht hypo</div><div class="card-val" id="histNightHypos">--</div><div class="card-sub">00-06u</div></div>
       <div class="card"><div class="card-label">Hyper (&gt;13.9)</div><div class="card-val warn" id="histHyper">--</div><div class="card-sub">Episodes</div></div>
       <div class="card"><div class="card-label">Hypo (&lt;3.0)</div><div class="card-val danger" id="histHypo">--</div><div class="card-sub">Episodes</div></div>
@@ -258,11 +285,16 @@ body{font-family:Inter,sans-serif;min-height:100vh;background:#f7f6f2;color:#282
 
   <!-- TRENDS -->
   <div id="view-trends" style="display:none">
-    <div class="time-filters">
-      <button class="active" onclick="setTrendPeriod(14)">14 dgn</button>
-      <button onclick="setTrendPeriod(30)">30 dgn</button>
-      <button onclick="setTrendPeriod(60)">60 dgn</button>
-      <button onclick="setTrendPeriod(90)">90 dgn</button>
+    <div class="historie-header">
+      <h3>Trends</h3>
+      <select id="trendSelect" onchange="changeTrendPeriod()">
+        <option value="1">1 dag</option>
+        <option value="7">7 dagen</option>
+        <option value="14" selected>14 dagen</option>
+        <option value="30">30 dagen</option>
+        <option value="60">60 dagen</option>
+        <option value="90">90 dagen</option>
+      </select>
     </div>
     <div class="card" style="margin-bottom:20px">
       <div class="card-label">Glucose Overzicht - Alle Dagen</div>
@@ -375,6 +407,7 @@ var NS_TOKEN = "nsread-bf4271c2d5b495b4";
 var T = { veryLow: 3.0, low: 3.9, high: 10.0, veryHigh: 13.9 };
 var MAX_DAYS = 180;
 var DAYS = 30;
+var HOME_PERIOD = 1;
 var trendPeriod = 30;
 var data = [], r = {};
 var charts = {};
@@ -427,9 +460,13 @@ function changePeriod() {
 
 function setTrendPeriod(days) {
   trendPeriod = days;
-  document.querySelectorAll(".time-filters button").forEach(function(b) { b.classList.remove("active"); });
-  event.target.classList.add("active");
+  document.getElementById("trendSelect").value = days;
   updateTrends();
+}
+
+function changeTrendPeriod() {
+  var days = parseInt(document.getElementById("trendSelect").value);
+  setTrendPeriod(days);
 }
 
 function getFilteredData(days) {
@@ -440,7 +477,7 @@ function getFilteredData(days) {
 
 function analyze() {
   var cutoff = new Date();
-  cutoff.setDate(cutoff.getDate() - DAYS);
+  cutoff.setDate(cutoff.getDate() - HOME_PERIOD);
   var periodData = data.filter(function(d) { return d.date >= cutoff; });
   var vals = periodData.map(function(d) { return d.sgv; });
   
@@ -452,7 +489,8 @@ function analyze() {
   
   var oldest = periodData[0].date, newest = periodData[periodData.length - 1].date;
   var periodDays = Math.round((newest - oldest) / 86400000) || 1;
-  document.getElementById("statusBadge").textContent = periodDays + " dagen data";
+  var periodLabel = HOME_PERIOD === 1 ? "Vandaag" : HOME_PERIOD + " dagen";
+  document.getElementById("statusBadge").textContent = periodLabel;
   document.getElementById("lastUpdated").textContent = "Laatste: " + newest.toLocaleTimeString("nl-NL", {hour:"2-digit", minute:"2-digit"});
   
   var mean = vals.reduce(function(a, b) { return a + b; }, 0) / vals.length;
@@ -987,8 +1025,14 @@ function showView(id) {
     maaltijden: "Maaltijd Analyse",
     advies: "Persoonlijk Advies" 
   };
-  document.getElementById("pageTitle").textContent = titles[id] || id;
+  if (id === "overzicht") {
+    document.getElementById("pageTitle").textContent = "GlucoDash";
+    document.getElementById("desktopTitle").textContent = "GlucoDash";
+  } else {
+    document.getElementById("pageTitle").textContent = titles[id] || id;
+  }
   if (id === "historie") updateHistorie();
+  if (id === "trends") updateTrends();
   if (window.innerWidth < 901) {
     document.getElementById("sidebar").classList.remove("open");
   }
@@ -1083,12 +1127,89 @@ function changeHistoriePeriod() {
   updateHistorie();
 }
 
+function changeHomePeriod() {
+  HOME_PERIOD = parseInt(document.getElementById("homePeriodSelect").value);
+  analyze();
+  update();
+}
+
 function toggleSidebar() {
   document.getElementById("sidebar").classList.toggle("open");
 }
 
 document.addEventListener("DOMContentLoaded", init);
 setInterval(init, 300000);
+
+var infoData = {
+  gmi: {
+    title: "HbA1c (Gegllycosyleerd Hemoglobine)",
+    text: "HbA1c geeft je gemiddelde bloedsuiker over de afgelopen 2-3 maanden. Het wordt uitgedrukt in mmol/mol.<br><br><strong>Streefwaarde:</strong> Onder 53 mmol/mol<br><br>Een lager HbA1c betekent betere glucoseregulatie en minder risico op complicaties."
+  },
+  gmiPct: {
+    title: "GMI (Glucose Management Indicator)",
+    text: "GMI schat je HbA1c op basis van je CGM glucosegegevens.<br><br><strong>Formule:</strong> GMI (%) = 3.31 + (0.43 × gemiddelde glucose)<br><br><strong>Streefwaarde:</strong> Onder 6.5%<br><br>GMI is een maat voor hoe goed je glucose onder controle is op basis van je Dexcom data."
+  },
+  avg: {
+    title: "Gemiddelde Glucose",
+    text: "Het gemiddelde van al je glucosemetingen in mmol/L.<br><br><strong>Streefwaarde:</strong> Tussen 3.9 en 10 mmol/L<br><br>Een lager gemiddelde betekent betere controle, maar let op voor hypoglykemie."
+  },
+  sdVal: {
+    title: "SD (Standaard Deviatie)",
+    text: "SD meet hoeveel je glucose schommelt. Een hoge SD betekent grote pieken en dalen.<br><br><strong>Streefwaarde:</strong> Onder 2.2 mmol/L<br><br>Een lage SD betekent stabielere glucosewaarden."
+  },
+  cv: {
+    title: "CV (Coëfficiënt van Variatie)",
+    text: "CV is de standaarddeviatie gedeeld door het gemiddelde, uitgedrukt als percentage. Het meet glucosevariabiliteit ongeacht het niveau.<br><br><strong>Streefwaarde:</strong> Onder 36%<br><br> Een lagere CV betekent stabielere glucose, ongeacht of je gemiddeld hoog of laag bent."
+  },
+  nightHypos: {
+    title: "Nachtelijke Hypoglykemie",
+    text: "Aantal glucosewaarden onder 3.9 mmol/L tussen 00:00 en 06:00 uur.<br><br><strong>Wat te doen:</strong> Overweeg lagere nachtbasaal of een kleine snack voor het slapen.<br><br>Nachtelijke hypo\'s zijn gevaarlijk omdat je ze niet merkt tijdens je slaap."
+  },
+  hyperCount: {
+    title: "Hyperglykemie Episodes",
+    text: "Aantal episodes waarbij glucose boven 13.9 mmol/L lag.<br><br><strong>Wat te doen:</strong> Pre-bolus 15-20 minuten voor de maaltijd. Check je ISF (insulinegevoeligheid).<br><br>Herhaalde hoge waarden kunnen leiden tot complicaties op lange termijn."
+  },
+  hypoCount: {
+    title: "Hypoglykemie Episodes",
+    text: "Aantal glucosewaarden onder 3.0 mmol/L.<br><br><strong>Wat te doen:</strong> Overweeg lagere basaal of aanpassing van je koolhydraatratio.<br><br>Ernstige hypo\'s kunnen gevaarlijk zijn en vereisen directe actie met snelle koolhydraten."
+  },
+  days: {
+    title: "Aantal Dagen Data",
+    text: "Het aantal dagen waarover de statistieken zijn berekend.<br><br>Dit is de periode die je hebt geselecteerd in de dropdown (1, 7, 14, 30, 60, 90 of 180 dagen).<br><br>Meer dagen geeft een betrouwbaarder beeld van je glucoseregulatie."
+  },
+  total: {
+    title: "Totaal Aantal Metingen",
+    text: "Het totaal aantal glucosemetingen in de geselecteerde periode.<br><br>Dexcom meet elke 5 minuten, dus bij 24 uur data zijn er ongeveer 288 metingen.<br><br>Dit geeft aan hoe compleet je data is."
+  }
+};
+
+function showInfo(key) {
+  var data = infoData[key];
+  if (!data) return;
+  document.getElementById("modalTitle").textContent = data.title;
+  document.getElementById("modalText").innerHTML = data.text;
+  document.getElementById("modalOverlay").classList.add("show");
+}
+
+function closeModal() {
+  document.getElementById("modalOverlay").classList.remove("show");
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  document.getElementById("modalOverlay").addEventListener("click", function(e) {
+    if (e.target === this) closeModal();
+  });
+});
 </script>
+
+<!-- Popup Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-text" id="modalText"></div>
+  </div>
+</div>
+
 </body>
 </html>
