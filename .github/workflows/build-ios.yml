@@ -20,6 +20,16 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
+      - name: Maak www map met webbestanden
+        run: |
+          mkdir -p www
+          cp index.html www/
+          cp sw.js www/
+          cp manifest.json www/ 2>/dev/null || true
+          cp appicon.png www/ 2>/dev/null || true
+          cp icon.svg www/ 2>/dev/null || true
+          cp logo.png www/ 2>/dev/null || true
+
       - name: Add iOS platform
         run: npx cap add ios
 

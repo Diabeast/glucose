@@ -1,7 +1,7 @@
 {
   "appId": "com.9CGZ7BWVXT.glucodash",
   "appName": "GlucoDash",
-  "webDir": ".",
+  "webDir": "www",
   "plugins": {
     "CapacitorHealthkit": {}
   },
