@@ -68,6 +68,14 @@ jobs:
       - name: Install Fastlane via Bundler
         run: bundle install
 
+      - name: Patch Fastlane token.rb voor OpenSSL 3
+        run: |
+          TOKENFILE=$(find vendor/bundle -name "token.rb" -path "*/connect_api/*" 2>/dev/null | head -1)
+          echo "Token file: $TOKENFILE"
+          sed -i.bak 's/OpenSSL::PKey::EC\.new(key_content)/OpenSSL::PKey.read(key_content)/g' "$TOKENFILE"
+          echo "Na patch:"
+          grep -n "PKey" "$TOKENFILE"
+
       - name: Build & Upload to TestFlight
         env:
           TEAMID: ${{ secrets.TEAMID }}
