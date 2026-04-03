@@ -888,6 +888,9 @@
 
             console.log(`[GlucoDash] Totaal insuline: ${totalInsulin}U, SMBs: ${smbCount}`);
 
+            document.getElementById('total-insulin').innerText = totalInsulin;
+            document.getElementById('avg-smb').innerText = avgSmb;
+
             window.latestInsulinStats = { totalInsulin, avgSmb };
             triggerAI();
         }
