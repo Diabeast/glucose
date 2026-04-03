@@ -72,7 +72,7 @@ jobs:
         run: |
           TOKENFILE=$(find vendor/bundle -name "token.rb" -path "*/connect_api/*" 2>/dev/null | head -1)
           echo "Token file: $TOKENFILE"
-          sed -i.bak 's/OpenSSL::PKey::EC\.new(key_content)/OpenSSL::PKey.read(key_content)/g' "$TOKENFILE"
+          sed -i.bak 's/OpenSSL::PKey::EC\.new(\([^)]*\))/OpenSSL::PKey.read(\1)/g' "$TOKENFILE"
           echo "Na patch:"
           grep -n "PKey" "$TOKENFILE"
 
