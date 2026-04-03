@@ -1,3 +1,23 @@
+# Fix voor OpenSSL 3 'invalid curve name' bug in Fastlane
+# OpenSSL::PKey::EC.new werkt niet meer in OpenSSL 3 voor PKCS8 keys
+# OpenSSL::PKey.read is de correcte methode in OpenSSL 3
+require 'openssl'
+module OpenSSL
+  module PKey
+    class EC
+      class << self
+        alias_method :_old_new, :new unless method_defined?(:_old_new)
+        def new(*args)
+          return OpenSSL::PKey.read(*args) if args.first.is_a?(String)
+          _old_new(*args)
+        rescue OpenSSL::PKey::ECError
+          _old_new(*args)
+        end
+      end
+    end
+  end
+end
+
 default_platform(:ios)
 
 platform :ios do
