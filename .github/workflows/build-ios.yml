@@ -65,19 +65,14 @@ jobs:
           /usr/libexec/PlistBuddy -c "Add :NSHealthShareUsageDescription string 'GlucoDash leest je glucose en insuline data.'" ios/App/App/Info.plist
           /usr/libexec/PlistBuddy -c "Add :NSHealthUpdateUsageDescription string 'GlucoDash heeft schrijftoegang nodig voor HealthKit.'" ios/App/App/Info.plist
 
-      - name: Install Fastlane
-        run: gem install fastlane --no-document
-
-      - name: Schrijf API key naar bestand
-        env:
-          FASTLANE_KEY: ${{ secrets.FASTLANE_KEY }}
-        run: echo "$FASTLANE_KEY" > api_key.p8
+      - name: Install Fastlane via Bundler
+        run: bundle install
 
       - name: Build & Upload to TestFlight
         env:
           TEAMID: ${{ secrets.TEAMID }}
           FASTLANE_ISSUER_ID: ${{ secrets.FASTLANE_ISSUER_ID }}
           FASTLANE_KEY_ID: ${{ secrets.FASTLANE_KEY_ID }}
-          FASTLANE_KEY_PATH: api_key.p8
-        run: fastlane build_upload
+          FASTLANE_KEY: ${{ secrets.FASTLANE_KEY }}
+        run: bundle exec fastlane build_upload
         working-directory: .
