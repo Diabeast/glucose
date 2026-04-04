@@ -79,9 +79,16 @@ jobs:
 
       - name: Patch Fastlane token.rb voor OpenSSL 3
         run: |
-          TOKENFILE=$(find vendor/bundle -name "token.rb" -path "*/connect_api/*" 2>/dev/null | head -1)
-          echo "Token file: $TOKENFILE"
+          # Zoek token.rb in alle mogelijke locaties
+          TOKENFILE=$(find . -name "token.rb" -path "*/connect_api/*" 2>/dev/null | head -1)
+          echo "Token file gevonden: $TOKENFILE"
+          if [ -z "$TOKENFILE" ]; then
+            echo "FOUT: token.rb niet gevonden!"
+            find . -name "token.rb" 2>/dev/null | head -5
+            exit 1
+          fi
           sed -i.bak 's/OpenSSL::PKey::EC\.new(\([^)]*\))/OpenSSL::PKey.read(\1)/g' "$TOKENFILE"
+          echo "Na patch:"
           grep -n "PKey" "$TOKENFILE"
 
       - name: Schrijf API key naar bestand
