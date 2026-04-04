@@ -65,8 +65,23 @@ jobs:
           /usr/libexec/PlistBuddy -c "Add :NSHealthShareUsageDescription string 'GlucoDash leest je glucose en insuline data.'" ios/App/App/Info.plist
           /usr/libexec/PlistBuddy -c "Add :NSHealthUpdateUsageDescription string 'GlucoDash heeft schrijftoegang nodig voor HealthKit.'" ios/App/App/Info.plist
 
+      - name: Fix Ruby OpenSSL (LibreSSL → OpenSSL 3)
+        run: |
+          brew install openssl@3 || true
+          OPENSSL_DIR=$(brew --prefix openssl@3)
+          echo "OPENSSL_DIR=$OPENSSL_DIR" >> $GITHUB_ENV
+          gem install openssl -- --with-openssl-dir=$OPENSSL_DIR
+          bundle config build.openssl --with-openssl-dir=$OPENSSL_DIR
+
       - name: Install Fastlane via Bundler
         run: bundle install
+
+      - name: Patch Fastlane token.rb voor OpenSSL 3
+        run: |
+          TOKENFILE=$(find vendor/bundle -name "token.rb" -path "*/connect_api/*" 2>/dev/null | head -1)
+          echo "Token file: $TOKENFILE"
+          sed -i.bak 's/OpenSSL::PKey::EC\.new(\([^)]*\))/OpenSSL::PKey.read(\1)/g' "$TOKENFILE"
+          grep -n "PKey" "$TOKENFILE"
 
       - name: Schrijf API key naar bestand
         env:
@@ -78,56 +93,6 @@ jobs:
           echo "Grootte: $(wc -c < api_key.p8) bytes"
           head -c 50 api_key.p8; echo
           tail -c 30 api_key.p8; echo
-
-      - name: Diagnosteer Ruby OpenSSL + key parsing
-        env:
-          FASTLANE_KEY: ${{ secrets.FASTLANE_KEY }}
-        run: |
-          ruby -e "
-          require 'openssl'
-          require 'base64'
-          puts 'Ruby: ' + RUBY_VERSION
-          puts 'OpenSSL versie: ' + OpenSSL::OPENSSL_VERSION
-          puts 'openssl gem: ' + OpenSSL::VERSION
-
-          raw = ENV['FASTLANE_KEY'].to_s.strip
-          puts 'Secret start: ' + raw[0..50].inspect
-          puts 'Heeft BEGIN: ' + raw.include?('BEGIN').to_s
-
-          # Als geen BEGIN: base64 decoderen
-          pem = raw.start_with?('-----BEGIN') ? raw : Base64.decode64(raw)
-          puts 'PEM start na decode: ' + pem[0..50].inspect
-
-          # Schrijf naar temp bestand
-          File.write('/tmp/test_key.pem', pem)
-
-          # Test system openssl
-          system_result = \`/usr/bin/openssl pkey -in /tmp/test_key.pem -noout 2>&1\`
-          puts 'System openssl (LibreSSL): ' + system_result.strip
-
-          # Homebrew openssl
-          brew_ssl = Dir['/opt/homebrew/opt/openssl*/bin/openssl'].first
-          if brew_ssl
-            brew_result = \`#{brew_ssl} pkey -in /tmp/test_key.pem -noout 2>&1\`
-            puts 'Homebrew openssl: ' + brew_result.strip
-          end
-
-          # Ruby OpenSSL::PKey.read test
-          begin
-            k = OpenSSL::PKey.read(pem)
-            puts 'PKey.read: OK, type=' + k.class.to_s
-          rescue => e
-            puts 'PKey.read FOUT: ' + e.class.to_s + ': ' + e.message
-          end
-
-          # Ruby OpenSSL::PKey.read met bestand
-          begin
-            k = OpenSSL::PKey.read(File.binread('/tmp/test_key.pem'))
-            puts 'PKey.read(binread): OK'
-          rescue => e
-            puts 'PKey.read(binread) FOUT: ' + e.message
-          end
-          "
 
       - name: Build & Upload to TestFlight
         env:
